@@ -55,9 +55,9 @@
 /* 스크롤/하이라이트 개선 */
 html, body {
   height: 100%;
+  -webkit-overflow-scrolling: touch;
   overflow-x: hidden;
   overscroll-behavior: none; /* ios Safari 바운스 스크롤 방지 */
-  -webkit-overflow-scrolling: touch;
 }
 
 body {
