@@ -8,6 +8,7 @@ import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { CreateRoomRequest, RoomInfoResponse } from "@/features/create-meeting/types/apiTypes";
 import { formatDateForLocalDate } from "@/utils/dateUtils";
 import { roomService } from "@/features/create-meeting/api/roomService";
+import BodySection from "@/components/BodySection";
 
 export default function CreateMeetingPage() {
   const router = useRouter();
@@ -51,8 +52,8 @@ export default function CreateMeetingPage() {
   return (
       <div className="min-h-screen bg-main">
         <Header title="모임 만들기" />
-        <main className="flex flex-col items-center px-4 lg:px-8 py-4 gap-8">
-          <div className="flex flex-col bg-white rounded-2xl w-full px-6 py-8 gap-4">
+        <main className="main-container">
+          <BodySection>
             <h2 className="text-xl font-semibold">모임 정보</h2>
 
             <div className="flex flex-col gap-2">
@@ -67,9 +68,9 @@ export default function CreateMeetingPage() {
                   disabled={isLoading}
               />
             </div>
-          </div>
+          </BodySection>
 
-          <div className="flex flex-col bg-white rounded-2xl w-full px-6 py-8 gap-4">
+          <BodySection>
 
             <h2 className="text-xl font-semibold">날짜 선택</h2>
 
@@ -80,7 +81,7 @@ export default function CreateMeetingPage() {
                       onNextMonth={handleNextMonth}
                       isDateSelected={isDateSelected}
             />
-          </div>
+          </BodySection>
 
           <button
               onClick={handleCreateMeeting}
