@@ -79,7 +79,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP_BASE }}:${{ github.ref_name }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP_BASE }}-web:${{ github.ref_name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
