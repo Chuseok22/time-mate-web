@@ -3,27 +3,18 @@ import Header from "@/components/Header";
 import Calendar from "@/features/create-meeting/components/Calendar";
 import { useCalendar } from "@/features/create-meeting/hooks/useCalendar";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useErrorHandler } from "@/hooks/useErrorHandler";
+import { CreateRoomRequest, RoomInfoResponse } from "@/features/create-meeting/types/apiTypes";
+import { formatDateForLocalDate } from "@/utils/dateUtils";
+import { roomService } from "@/features/create-meeting/api/roomService";
 
 export default function CreateMeetingPage() {
-
+  const router = useRouter();
+  const { handleError } = useErrorHandler();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [title, setTitle] = useState<string>('');
 
-  const handleCreateMeeting = async () => {
-    if (!title.trim() || selectedDates.length === 0) {
-      alert("모임 제목과 날짜를 선택해주세요");
-      return;
-    }
-    try {
-      setIsLoading(true);
-      // 백엔드 api 호출
-    } catch (error) {
-      console.error('모임 생성 실패', error)
-    } finally {
-      setIsLoading(false);
-    }
-
-  }
   const {
     currentDate,
     selectedDates,
@@ -32,6 +23,30 @@ export default function CreateMeetingPage() {
     handleDateSelect,
     isDateSelected,
   } = useCalendar();
+
+  const handleCreateMeeting = async () => {
+    if (!title.trim() || selectedDates.length === 0) {
+      alert("모임 제목과 날짜를 선택해주세요");
+      return;
+    }
+    try {
+      setIsLoading(true);
+
+      // API 호출
+      const createRoomRequest: CreateRoomRequest = {
+        title: title.trim(),
+        dates: selectedDates.map(item => formatDateForLocalDate(item.date)),
+      };
+      const roomInfoResponse: RoomInfoResponse = await roomService.createRoom(createRoomRequest);
+
+      router.push(`/meeting/${roomInfoResponse.meetingRoomId}`);
+
+    } catch (error) {
+      handleError(error); // 에러 중앙 처리
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
       <div className="min-h-screen bg-main">
@@ -49,6 +64,7 @@ export default function CreateMeetingPage() {
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="모임 제목을 입력하세요"
                   className="ring-gray-100 ring-2 outline-none p-3.5 rounded-2xl focus:ring-blue-500"
+                  disabled={isLoading}
               />
             </div>
           </div>
@@ -68,11 +84,14 @@ export default function CreateMeetingPage() {
 
           <button
               onClick={handleCreateMeeting}
+              disabled={!title.trim() || selectedDates.length === 0 || isLoading}
               className="flex justify-center items-center
                          bg-blue-500 text-white text-xl
                          font-bold rounded-2xl
                          w-full py-4 shadow-xl
-                         hover:cursor-pointer hover:bg-blue-300 transition"
+                         hover:cursor-pointer hover:bg-blue-300
+                         disabled:bg-gray-300 disabled:cursor-not-allowed
+                         transition"
           >
             {isLoading ? '생성중...' : '모임 만들기'}
           </button>
