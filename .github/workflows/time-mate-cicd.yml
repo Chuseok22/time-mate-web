@@ -7,7 +7,7 @@ on:
       - test
 
 env:
-  APP_BASE: time-mate
+  APP_BASE: meet-time
 
 jobs:
   build:
