@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { ProxyContext } from "@/api/bff/proxyTypes";
-import { createProxy } from "@/api/bff/proxy";
+import { ProxyContext } from "@/lib/bff/proxyTypes";
+import { createProxy } from "@/lib/bff/proxy";
 
 const API_BASE_URL: string = process.env.API_BASE_URL ?? "";
 
