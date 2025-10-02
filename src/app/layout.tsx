@@ -45,17 +45,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-      <html lang="ko" className={`${pacifico.variable}`}>
+      <html lang="ko"
+            className={`${pacifico.variable}`}>
       <body
           // Tailwind 전역 클래스: 안전한 영역(p-safe)과 가독성을 위한 기본 레이아웃
           className="min-h-screen bg-white text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-50"
       >
       {/* 안전영역 패딩: iOS 노치/홈인디케이터 대응 */}
-      <div className="min-h-screen pt-safe-top pr-safe-right pb-safe-bottom pl-safe-left bg-red-50"> {/*TODO: bg-red-50 -> bg-main 변경 필요*/}
-        {/* 전역 컨테이너: 모바일 우선 + 데스크톱 가독성 */}
-        <div className="mx-auto w-full max-w-screen-lg px-4 sm:px-6 lg:px-8">
-          {children}
-        </div>
+      <div className="min-h-screen pt-safe-top pr-safe-right pb-safe-bottom pl-safe-left bg-red-50 mx-auto w-full max-w-screen-lg"> {/*TODO: bg-red-50 -> bg-main 변경 필요*/}
+        {children}
       </div>
       </body>
       </html>

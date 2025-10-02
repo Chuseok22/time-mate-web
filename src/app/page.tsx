@@ -4,7 +4,7 @@ import ActionCard from "@/features/home/components/ActionCard";
 
 export default function Home() {
   return (
-      <div className="flex flex-col items-center bg-main gap-3 w-full py-20">
+      <div className="flex flex-col min-h-screen items-center bg-main gap-3 w-full py-20">
         <div className="flex justify-center, items-center text-5xl font-pacifico">
           meetTime
         </div>
@@ -21,7 +21,7 @@ export default function Home() {
           />
         </div>
 
-        <div className="flex flex-col w-full gap-8">
+        <div className="flex flex-col w-full gap-8 px-4 lg:px-8">
           <ActionCard
               title="새 모임 만들기"
               description="새로운 모임을 만들어 보세요"
@@ -30,7 +30,7 @@ export default function Home() {
               buttonText="모임 만들기"
               buttonColor="bg-blue-500"
               buttonHoverColor="hover:bg-blue-300"
-              href="/craete-meeting"
+              href="/create-meeting"
           />
           <ActionCard
               title="모임 참여하기"
