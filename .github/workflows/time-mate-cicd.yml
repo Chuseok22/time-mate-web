@@ -105,12 +105,12 @@ jobs:
             export PW=${{ secrets.SERVER_PASSWORD }}
             BRANCH=${{ github.ref_name }}
             PORT=3000
-            CONTAINER_NAME="${APP_BASE}"
+            CONTAINER_NAME=${APP_BASE}-web
             
             if [ "$BRANCH" == "main" ]; then
               PORT=3005
             elif [ "$BRANCH" == "test" ]; then
-              CONTAINER_NAME="${APP_BASE}-test"
+              CONTAINER_NAME="${APP_BASE}-web-test"
               PORT=3006
             fi
             
