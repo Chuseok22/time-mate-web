@@ -56,12 +56,6 @@
   }
 }
 
-@layer components {
-  .bg-main {
-    @apply bg-sky-100
-  }
-}
-
 /* 스크롤/하이라이트 개선 */
 html, body {
   height: 100%;
@@ -79,4 +73,13 @@ body {
   font-family: Pretendard, Pacifico, Arial, Helvetica, sans-serif;
   -webkit-tap-highlight-color: transparent;
   text-rendering: optimizeLegibility;
+}
+
+@layer components {
+  .bg-main {
+    @apply bg-sky-100
+  }
+  .main-container {
+    @apply flex flex-col items-center px-4 lg:px-8 py-4 gap-8
+  }
 }
