@@ -106,6 +106,7 @@ jobs:
             BRANCH=${{ github.ref_name }}
             PORT=3000
             CONTAINER_NAME=${APP_BASE}-web
+            IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${APP_BASE}-web:${BRANCH}
             
             if [ "$BRANCH" == "main" ]; then
               PORT=3005
@@ -118,8 +119,8 @@ jobs:
             echo "컨테이너 이름: $CONTAINER_NAME"
             echo "포트: $PORT"
             
-            echo "도커 이미지 풀 : ${{ secrets.DOCKERHUB_USERNAME }}/${APP_BASE}:${BRANCH}"
-            echo $PW | sudo -S docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${APP_BASE}:${BRANCH}
+            echo "도커 이미지 풀 : $IMAGE"
+            echo $PW | sudo -S docker pull $IMAGE
             
             echo "컨테이너 $CONTAINER_NAME 존재 여부 확인 중..."
             if sudo docker ps -a --format '{{.Names}}' | grep -Eq "^${CONTAINER_NAME}\$"; then
@@ -134,7 +135,7 @@ jobs:
             echo "${{ secrets.ENV_PRODUCTION }}" > .env.production
             echo $PW | sudo -S docker run -d -p ${PORT}:3000 --name $CONTAINER_NAME \
               --env-file .env.production \
-              ${{ secrets.DOCKERHUB_USERNAME }}/${APP_BASE}:${BRANCH}
+              ${IMAGE}
             
             # <none> 태그로 남은 이미지 정리
             echo "불필요한 dangling(<none>) 이미지 정리..."
