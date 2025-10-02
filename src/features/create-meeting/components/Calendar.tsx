@@ -90,7 +90,7 @@ export default function Calendar({
           </div>
 
 
-          <h3 className="flex flex-5 justify-center items-center text-lg font-bold text-gray-900">
+          <h3 className="flex flex-6 justify-center items-center text-lg font-bold text-gray-900">
             {currentDate.getFullYear()}년 {currentDate.getMonth() + 1}월
           </h3>
 

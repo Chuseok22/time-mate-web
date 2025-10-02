@@ -14,8 +14,15 @@ export default function CreateMeetingPage() {
       alert("모임 제목과 날짜를 선택해주세요");
       return;
     }
-    setIsLoading(true);
-    // 백엔드 api 호출
+    try {
+      setIsLoading(true);
+      // 백엔드 api 호출
+    } catch (error) {
+      console.error('모임 생성 실패', error)
+    } finally {
+      setIsLoading(false);
+    }
+
   }
   const {
     currentDate,
@@ -65,7 +72,7 @@ export default function CreateMeetingPage() {
                          bg-blue-500 text-white text-xl
                          font-bold rounded-2xl
                          w-full py-4 shadow-xl
-                         hover: cursor-pointer hover:bg-blue-300 transition"
+                         hover:cursor-pointer hover:bg-blue-300 transition"
           >
             {isLoading ? '생성중...' : '모임 만들기'}
           </button>

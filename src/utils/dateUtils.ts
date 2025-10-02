@@ -11,7 +11,7 @@ export function formatDateForLocalDate(date: Date): string {
 }
 
 // LocalDateTime 형태 변환
-export function formateDateForLocalDateTime(date: Date): string {
+export function formatDateForLocalDateTime(date: Date): string {
   return date.toISOString().slice(0, 19); // "2025-10-01T09:00:00"
 }
 
@@ -34,7 +34,7 @@ export function formatDateForDetailDisplay(date: Date): string {
 // 시간 표시용 포맷
 export function formatTimeForDisplay(date: Date): string {
   const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
   return `${hours}:${minutes}`;
 }
 
