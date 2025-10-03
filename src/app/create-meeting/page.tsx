@@ -54,33 +54,37 @@ export default function CreateMeetingPage() {
         <Header title="모임 만들기" />
         <main className="main-container">
           <BodySection>
-            <h2 className="text-xl font-semibold">모임 정보</h2>
+            <div className="flex flex-col w-full gap-4">
+              <h2 className="text-xl font-semibold">모임 정보</h2>
 
-            <div className="flex flex-col gap-2">
-              <label className="">
-                모임 제목 <span className="text-red-500">*</span>
-              </label>
-              <input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="모임 제목을 입력하세요"
-                  className="ring-gray-100 ring-2 outline-none p-3.5 rounded-2xl focus:ring-blue-500"
-                  disabled={isLoading}
-              />
+              <div className="flex flex-col gap-2">
+                <label className="">
+                  모임 제목 <span className="text-red-500">*</span>
+                </label>
+                <input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="모임 제목을 입력하세요"
+                    className="ring-gray-100 ring-2 outline-none p-3.5 rounded-2xl focus:ring-blue-500"
+                    disabled={isLoading}
+                />
+              </div>
             </div>
           </BodySection>
 
           <BodySection>
 
-            <h2 className="text-xl font-semibold">날짜 선택</h2>
+            <div className="flex flex-col w-full gap-4">
+              <h2 className="text-xl font-semibold">날짜 선택</h2>
 
-            <Calendar currentDate={currentDate}
-                      selectedDates={selectedDates}
-                      onDateSelect={handleDateSelect}
-                      onPrevMonth={handlePrevMonth}
-                      onNextMonth={handleNextMonth}
-                      isDateSelected={isDateSelected}
-            />
+              <Calendar currentDate={currentDate}
+                        selectedDates={selectedDates}
+                        onDateSelect={handleDateSelect}
+                        onPrevMonth={handlePrevMonth}
+                        onNextMonth={handleNextMonth}
+                        isDateSelected={isDateSelected}
+              />
+            </div>
           </BodySection>
 
           <button
