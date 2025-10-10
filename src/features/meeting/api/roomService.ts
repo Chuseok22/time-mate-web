@@ -9,8 +9,8 @@ export class RoomService {
   }
 
   // 조회
-  async getRoomInfo(roodId: string): Promise<RoomInfoResponse> {
-    return apiClient.get<RoomInfoResponse>(`/api/rooms/${roodId}`);
+  async getRoomInfo(roomId: string): Promise<RoomInfoResponse> {
+    return apiClient.get<RoomInfoResponse>(`/api/rooms/${roomId}`);
   }
 }
 
