@@ -21,14 +21,14 @@ export function formatDateForDisplay(date: Date): string {
 }
 
 // 상세 표시용 포맷
-export function formatDateForDetailDisplay(date: Date): string {
+export function formatDateForDetailDisplay(date: Date): { year: number, month: number; day: number; dayName: string } {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const day = date.getDate();
   const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
   const dayName = dayNames[date.getDay()];
 
-  return `${year}년 ${month}월 ${day}일 (${dayName})`;
+  return { year, month, day, dayName };
 }
 
 // 시간 표시용 포맷
