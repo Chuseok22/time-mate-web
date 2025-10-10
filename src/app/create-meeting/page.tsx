@@ -5,10 +5,11 @@ import { useCalendar } from "@/features/create-meeting/hooks/useCalendar";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
-import { CreateRoomRequest, RoomInfoResponse } from "@/features/create-meeting/types/apiTypes";
+import { CreateRoomRequest } from "@/features/create-meeting/types/apiTypes";
 import { formatDateForLocalDate } from "@/utils/dateUtils";
 import { roomService } from "@/features/create-meeting/api/roomService";
 import BodySection from "@/components/BodySection";
+import { RoomInfoResponse } from "@/features/meeting/types/apiTypes";
 
 export default function CreateMeetingPage() {
   const router = useRouter();
