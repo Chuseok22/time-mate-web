@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { CreateRoomRequest } from "@/features/create-meeting/types/apiTypes";
 import { formatDateForLocalDate } from "@/utils/dateUtils";
-import { roomService } from "@/features/create-meeting/api/roomService";
+import { roomService } from "@/features/meeting/api/roomService";
 import BodySection from "@/components/BodySection";
 import { RoomInfoResponse } from "@/features/meeting/types/apiTypes";
 
