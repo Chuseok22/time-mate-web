@@ -5,6 +5,7 @@ import { CalendarCheck } from "lucide-react";
 import { useState } from "react";
 import TimeGrid from "@/features/meeting/components/TimeGrid";
 import { RoomInfoResponse } from "@/features/meeting/types/apiTypes";
+import { TimeGridData } from "@/features/meeting/types/timeGridTypes";
 
 const mockRoomInfoResponse: RoomInfoResponse = {
   meetingRoomId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
