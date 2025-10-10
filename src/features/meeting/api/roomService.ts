@@ -7,6 +7,11 @@ export class RoomService {
   async createRoom(request: CreateRoomRequest): Promise<RoomInfoResponse> {
     return apiClient.post<RoomInfoResponse>('/api/rooms', request);
   }
+
+  // 조회
+  async getRoom(roodId: string): Promise<RoomInfoResponse> {
+    return apiClient.get<RoomInfoResponse>(`/api/rooms/${roodId}`);
+  }
 }
 
 // 싱글톤 인스턴스
