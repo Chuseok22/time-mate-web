@@ -18,7 +18,8 @@ export async function GET(
 
   if (!response.ok) {
     console.error('[BFF] 백엔드 API 호출 중 오류 발생');
-    return NextResponse.json(response);
+    const data = await response.json()
+    return NextResponse.json(data);
   }
 
   const data = await response.json();

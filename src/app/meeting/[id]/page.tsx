@@ -1,105 +1,53 @@
-'use client'
+import { RoomInfoResponse } from "@/features/meeting/types/apiTypes";
+import { JSX } from "react";
+import { ORIGIN_URL } from "@/lib/types";
 import Header from "@/components/Header";
 import BodySection from "@/components/BodySection";
 import { CalendarCheck } from "lucide-react";
-import { useState } from "react";
-import TimeGrid from "@/features/meeting/components/TimeGrid";
-import { RoomInfoResponse } from "@/features/meeting/types/apiTypes";
-import { TimeGridData } from "@/features/meeting/types/timeGridTypes";
+import TimeGridContainer from "@/features/meeting/containers/TimeGridContainer";
 
-const mockRoomInfoResponse: RoomInfoResponse = {
-  meetingRoomId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  title: "팀 회의",
-  dates: ["2025-10-08", "2025-10-09", "2025-10-10", "2025-10-11", "2025-10-12", "2025-10-13"],
-  participantsCount: 3,
-  dateAvailabilityResponses: [
-    {
-      date: "2025-10-08",
-      timeSlotParticipantsResponses: [
-        {
-          timeSlot: "SLOT_08_00",
-          participantInfoResponses: [
-            { participantId: "1", username: "김철수" },
-            { participantId: "2", username: "이영희" }
-          ],
-          availabilityCount: 2
-        },
-        {
-          timeSlot: "SLOT_09_00",
-          participantInfoResponses: [
-            { participantId: "1", username: "김철수" }
-          ],
-          availabilityCount: 1
-        }
-      ]
-    },
-    {
-      date: "2025-10-09",
-      timeSlotParticipantsResponses: [
-        {
-          timeSlot: "SLOT_10_00",
-          participantInfoResponses: [
-            { participantId: "1", username: "김철수" },
-            { participantId: "2", username: "이영희" },
-            { participantId: "3", username: "박민수" }
-          ],
-          availabilityCount: 3
-        }
-      ]
-    }
-  ]
-};
+// 가장 인기 있는 시간대 찾기
+function getMostPopularSlot(roomInfo: RoomInfoResponse): { date: string, timeSlot: string, count: number } | null {
+  let maxCount: number = 0;
+  let popularSlot: { date: string, timeSlot: string, count: number } | null = null;
 
-export default function MeetingPage() {
-  const [roomInfo, setRoomInfo] = useState<RoomInfoResponse>(mockRoomInfoResponse);
-
-  const transformToTimeGridData = (data: RoomInfoResponse): TimeGridData[] => {
-    const gridData: TimeGridData[] = [];
-
-    data.dateAvailabilityResponses.forEach(dateResponse => {
-      dateResponse.timeSlotParticipantsResponses.forEach(timeSlotResponse => {
-        gridData.push({
+  roomInfo.dateAvailabilityResponses.forEach(dateResponse => {
+    dateResponse.timeSlotParticipantsResponses.forEach(timeSlotResponse => {
+      if (timeSlotResponse.availabilityCount > maxCount) {
+        maxCount = timeSlotResponse.availabilityCount;
+        popularSlot = {
           date: dateResponse.date,
           timeSlot: timeSlotResponse.timeSlot,
-          usernames: timeSlotResponse.participantInfoResponses.map(participant => participant.username),
           count: timeSlotResponse.availabilityCount
-        });
-      });
+        };
+      }
     });
+  });
 
-    return gridData;
-  }
+  return popularSlot;
+}
 
-  const timeGridData = transformToTimeGridData(roomInfo);
+export default async function MeetingPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<JSX.Element> {
+  const { id: roomId } = await params;
 
-  // 가장 인기 있는 시간대 찾기
-  const getMostPopularSlot = () => {
-    let maxCount = 0;
-    let popularSlot = null;
+  const response = await fetch(`${ORIGIN_URL}/api/rooms/${roomId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-    roomInfo.dateAvailabilityResponses.forEach(dateResponse => {
-      dateResponse.timeSlotParticipantsResponses.forEach(timeSlotResponse => {
-        if (timeSlotResponse.availabilityCount > maxCount) {
-          maxCount = timeSlotResponse.availabilityCount;
-          popularSlot = {
-            date: dateResponse.date,
-            timeSlot: timeSlotResponse.timeSlot,
-            count: timeSlotResponse.availabilityCount
-          };
-        }
-      });
-    });
+  const roomInfo: RoomInfoResponse = await response.json();
 
-    return popularSlot;
-  };
-
-  const handleTimeSlotClick = (date: string, timeSlot: string, usernames: string[]) => {
-    alert(`클릭된 시간: ${date} ${timeSlot}`);
-  }
+  const mostPopularSlot = getMostPopularSlot(roomInfo);
 
   return (
       <div className="min-h-screen bg-main">
-        <Header title={"모임 제목"} />
+        <Header title={`${roomInfo.title}`} />
         <main className="main-container">
           <BodySection>
             <div className="flex flex-col w-full gap-6">
@@ -111,10 +59,10 @@ export default function MeetingPage() {
                 </div>
                 <div className="flex flex-col flex-5 gap-1">
                   <div className="text-xl font-bold">
-                    모임 제목 여기다가 쓰셈
+                    {roomInfo.title}
                   </div>
                   <div>
-                    모임 코드: ID 여따가 적으셈
+                    모임 코드: {roomId}
                   </div>
                 </div>
               </div>
@@ -123,9 +71,15 @@ export default function MeetingPage() {
                 <p className="text-xl text-blue-500 font-bold">
                   가장 많은 투표
                 </p>
-                <p className="text-lg text-blue-500 font-bold">
-                  10/1 (월) 10:30 - 2명
-                </p>
+                {mostPopularSlot ? (
+                    <p className="text-lg text-blue-500 font-bold">
+                      {mostPopularSlot.date} {mostPopularSlot.timeSlot} - {mostPopularSlot.count}명
+                    </p>
+                ) : (
+                    <p className="text-lg text-gray-500">
+                      아직 투표가 없습니다.
+                    </p>
+                )}
               </div>
             </div>
           </BodySection>
@@ -136,17 +90,11 @@ export default function MeetingPage() {
               <p className="font-semibold">참여자들의 시간을 확인하세요</p>
             </div>
 
-            <div>
-              <TimeGrid
-                  dates={roomInfo.dates}
-                  timeGridData={timeGridData}
-                  maxParticipantCount={roomInfo.participantsCount}
-                  onTimeSlotClick={handleTimeSlotClick}
-                  mode='view'
-              />
+            <div className="flex w-full items-center justify-center border p-4">
+              <TimeGridContainer roomInfo={roomInfo} />
             </div>
           </BodySection>
         </main>
       </div>
-  );
+  )
 };
