@@ -9,7 +9,7 @@ export class RoomService {
   }
 
   // 조회
-  async getRoom(roodId: string): Promise<RoomInfoResponse> {
+  async getRoomInfo(roodId: string): Promise<RoomInfoResponse> {
     return apiClient.get<RoomInfoResponse>(`/api/rooms/${roodId}`);
   }
 }
