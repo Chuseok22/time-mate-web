@@ -15,11 +15,6 @@ export function formatDateForLocalDateTime(date: Date): string {
   return date.toISOString().slice(0, 19); // "2025-10-01T09:00:00"
 }
 
-// 화면 표시용 포맷
-export function formatDateForDisplay(date: Date): string {
-  return `${date.getMonth() + 1}/${date.getDate()}`; // "10/1"
-}
-
 // 상세 표시용 포맷
 export function formatDateForDetailDisplay(date: Date): { year: number, month: number; day: number; dayName: string } {
   const year = date.getFullYear();
@@ -36,18 +31,5 @@ export function formatTimeForDisplay(date: Date): string {
   const hours = date.getHours().toString().padStart(2, '0');
   const minutes = date.getMinutes().toString().padStart(2, '0');
   return `${hours}:${minutes}`;
-}
-
-// 30분 간격 시간 슬롯 생성
-export function generateTimeSlots(date: Date, startHour: number, endHour: number): Date[] {
-  const slots: Date[] = [];
-  for (let hour = startHour; hour < endHour; hour++) {
-    // 정시
-    slots.push(new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, 0));
-    // 30분
-    slots.push(new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, 30));
-  }
-
-  return slots;
 }
 
