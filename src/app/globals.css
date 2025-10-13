@@ -61,7 +61,7 @@ html, body {
   height: 100%;
   height: 100dvh;
   -webkit-overflow-scrolling: touch;
-  overflow-x: hidden;
+  overflow-x: auto;
   overscroll-behavior: none; /* ios Safari 바운스 스크롤 방지 */
   -webkit-text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
