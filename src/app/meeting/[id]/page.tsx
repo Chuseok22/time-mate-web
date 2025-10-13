@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import BodySection from "@/components/BodySection";
 import { CalendarCheck } from "lucide-react";
 import TimeGridContainer from "@/features/meeting/containers/TimeGridContainer";
+import { TIME_SLOT_MAP } from "@/types/timeSlot";
 
 // 가장 인기 있는 시간대 찾기
 function getMostPopularSlot(roomInfo: RoomInfoResponse): { date: string, timeSlot: string, count: number } | null {
@@ -68,15 +69,15 @@ export default async function MeetingPage({
               </div>
 
               <div className="flex flex-col bg-main rounded-2xl gap-3 p-5 w-full">
-                <p className="text-xl text-blue-500 font-bold">
+                <p className="text-lg text-blue-500 font-bold">
                   가장 많은 투표
                 </p>
                 {mostPopularSlot ? (
-                    <p className="text-lg text-blue-500 font-bold">
-                      {mostPopularSlot.date} {mostPopularSlot.timeSlot} - {mostPopularSlot.count}명
+                    <p className="text-blue-500 font-bold">
+                      {mostPopularSlot.date} {TIME_SLOT_MAP[mostPopularSlot.timeSlot]} - {mostPopularSlot.count}명
                     </p>
                 ) : (
-                    <p className="text-lg text-gray-500">
+                    <p className="text-gray-500">
                       아직 투표가 없습니다.
                     </p>
                 )}
@@ -87,10 +88,14 @@ export default async function MeetingPage({
           <BodySection>
             <div className="flex flex-col w-full gap-4">
               <h2 className="text-xl font-semibold">날짜 선택</h2>
-              <p className="font-semibold">참여자들의 시간을 확인하세요</p>
+              <div className="flex flex-row">
+                <div className="font-semibold text-lg mb-4">
+                  참여자: <span className="text-xl font-bold text-blue-500">{roomInfo.participantsCount}</span> 명
+                </div>
+              </div>
             </div>
 
-            <div className="flex w-full items-center justify-center border p-4">
+            <div className="flex w-full items-center justify-center border border-sky-300 rounded-2xl p-4">
               <TimeGridContainer roomInfo={roomInfo} />
             </div>
           </BodySection>
