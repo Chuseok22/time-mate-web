@@ -1,4 +1,4 @@
-import { ApiErrorResponse } from "@/lib/errors/apiTypes";
+import { handleErrorResponse } from "@/lib/errors/errorResponse";
 import { ErrorCode } from "@/lib/errors/errorCodes";
 import { CustomError } from "@/lib/errors/customError";
 
@@ -20,7 +20,7 @@ export class ApiClient {
       });
 
       if (!response.ok) {
-        await this.handleErrorResponse(response);
+        await handleErrorResponse(response);
       }
 
       return await response.json();
@@ -36,19 +36,6 @@ export class ApiClient {
       }
       throw new CustomError(ErrorCode.INTERNAL_SERVER_ERROR, 500);
     }
-  }
-
-  private async handleErrorResponse(response: Response): Promise<never> {
-    const errorData: ApiErrorResponse = await response.json();
-
-    const errorCode = errorData.errorCode as ErrorCode;
-
-    if (Object.values(ErrorCode).includes(errorCode)) {
-      throw new CustomError(errorCode, response.status, errorData.errorMessage);
-    }
-
-    // 알 수 없는 에러 코드인 경우
-    throw new CustomError(ErrorCode.INTERNAL_SERVER_ERROR, response.status, errorData.errorMessage);
   }
 
   // 편의 메서드 (GET, POST, PUT, PATCH, DELETE)
