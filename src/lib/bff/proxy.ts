@@ -50,25 +50,66 @@ export function createProxy(config: ProxyConfig): ProxyHandler {
   const backendHost = backendUrl.host;
 
   return async (req: NextRequest, ctx: ProxyContext): Promise<Response> => {
-    const { path: segs } = await ctx.params;
-    const path = Array.isArray(segs) ? segs.join('/') : '';
-    const target = joinUrl(config.backendBaseUrl, path, new URL(req.url).search);
+    try {
+      const { path: segs } = await ctx.params;
+      const path = Array.isArray(segs) ? segs.join('/') : '';
+      const target = joinUrl(config.backendBaseUrl, path, new URL(req.url).search);
 
-    const upstreamHeaders = buildUpstreamHeaders(req, backendHost, config);
+      // 요청 로깅
+      console.log(`[BFF] ${req.method} /${path} → ${target}`);
 
-    const upstream = await fetch(target, {
-      method: req.method,
-      headers: upstreamHeaders,
-      body: req.method === 'GET' || req.method === 'HEAD' ? undefined : req.body,
-      // 주의: 캐시는 페이지/RSC 레이어에서 제어. 여기선 그대로 전달.
-    });
+      const upstreamHeaders = buildUpstreamHeaders(req, backendHost, config);
 
-    // 응답을 그대로 브리지(Set-Cookie 포함)
-    const res = new NextResponse(upstream.body, { status: upstream.status });
-    upstream.headers.forEach((value, key) => {
-      res.headers.set(key, value);
-    });
+      // body 처리 개선
+      let body: BodyInit | undefined = undefined;
+      if (req.method !== 'GET' && req.method !== 'HEAD' && req.body) {
+        body = await req.text();
+      }
 
-    return res;
+      const upstream = await fetch(target, {
+        method: req.method,
+        headers: upstreamHeaders,
+        body,
+      });
+
+      // 응답 로깅
+      console.log(`[BFF] /${path} 응답: ${upstream.status} ${upstream.statusText}`);
+
+      // 에러 응답 처리
+      if (!upstream.ok) {
+        console.error(`[BFF] /${path} API 오류: ${upstream.status}`);
+
+        // 에러 응답도 그대로 전달하되 로깅
+        try {
+          const errorData = await upstream.clone().json();
+          console.error(`[BFF] /${path} 에러 내용:`, errorData);
+        } catch {
+          // JSON 파싱 실패 시 무시
+        }
+      }
+
+      // 응답을 그대로 브리지(Set-Cookie 포함)
+      const res = new NextResponse(upstream.body, {
+        status: upstream.status,
+        statusText: upstream.statusText
+      });
+
+      upstream.headers.forEach((value, key) => {
+        res.headers.set(key, value);
+      });
+
+      return res;
+    } catch (error) {
+      console.error(`[BFF] 프록시 처리 중 오류:`, error);
+
+      // 네트워크 오류 등의 경우 500 응답
+      return NextResponse.json(
+          {
+            error: 'Internal Server Error',
+            message: 'Backend API 호출 중 오류가 발생했습니다.'
+          },
+          { status: 500 }
+      );
+    }
   };
 }
