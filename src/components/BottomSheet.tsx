@@ -71,9 +71,9 @@ export default function BottomSheet({
     setDragging(false);
     pointerIdRef.current = null;
 
-    window.removeEventListener('pointermove', onGlobalPointerMove as any);
-    window.removeEventListener('pointerup', endDrag as any);
-    window.removeEventListener('pointercancel', endDrag as any);
+    window.removeEventListener('pointermove', onGlobalPointerMove);
+    window.removeEventListener('pointerup', endDrag);
+    window.removeEventListener('pointercancel', endDrag);
 
     // 닫기 임계치 (12vh 미만이면 닫힘)
     if (heightPct < 12) {
