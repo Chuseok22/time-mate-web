@@ -15,7 +15,6 @@ export default function TimeGrid({
   onTimeSlotClick,
 }: TimeGridProps): JSX.Element {
   const gridCols = `repeat(${roomInfo.dates.length}, 100px)`;
-  console.log(roomInfo);
 
   return (
       <div className="w-full">
