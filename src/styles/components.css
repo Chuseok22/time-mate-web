@@ -1,8 +1,8 @@
 @layer components {
   .bg-main {
-    @apply bg-sky-100
+    @apply bg-sky-100;
   }
   .main-container {
-    @apply flex flex-col items-center px-4 lg:px-8 py-4 gap-8
+    @apply flex flex-col items-center px-4 lg:px-8 py-4 gap-8;
   }
 }
