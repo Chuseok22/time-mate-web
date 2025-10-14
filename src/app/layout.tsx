@@ -48,19 +48,6 @@ export default function RootLayout({
       <html lang="ko" className={pacifico.variable}>
       <body className="min-h-screen-safe bg-white text-gray-900 antialiased">
 
-      {/* ===== Color Shims: safe-area 배경을 강제로 'white'로 칠함 ===== */}
-      <div
-          className="fixed top-0 left-0 right-0 z-[60] bg-white dark:bg-gray-950"
-          style={{ height: "env(safe-area-inset-top, 0)" }}
-          aria-hidden
-      />
-      <div
-          className="fixed bottom-0 left-0 right-0 z-[60] bg-white dark:bg-gray-950"
-          style={{ height: "env(safe-area-inset-bottom, 0)" }}
-          aria-hidden
-      />
-      {/* =========================================================== */}
-
       <div className="min-h-screen-safe pt-safe-top pr-safe-right pb-safe-bottom pl-safe-left">
         <div className="mx-auto w-full max-w-screen-lg">
           {children}
