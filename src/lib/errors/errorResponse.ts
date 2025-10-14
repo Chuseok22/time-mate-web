@@ -10,7 +10,13 @@ export interface ApiErrorResponse {
  * 공통 에러 응답 처리 유틸 메서드
  */
 export async function handleErrorResponse(response: Response): Promise<never> {
-  const errorData: ApiErrorResponse = await response.json();
+  let errorData: ApiErrorResponse;
+  try {
+    errorData = await response.json();
+  } catch {
+    // JSON 파싱 실패 시 기본 에러 응답 사용
+    throw new CustomError(ErrorCode.INVALID_RESPONSE_FORMAT, response.status);
+  }
 
   const errorCode = errorData.errorCode as ErrorCode;
 
