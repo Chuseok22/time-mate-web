@@ -1,5 +1,6 @@
-import { CreateRoomRequest, RoomInfoResponse } from "@/features/create-meeting/types/apiTypes";
+import { CreateRoomRequest } from "@/features/create-meeting/types/apiTypes";
 import { apiClient } from "@/lib/api/apiClient";
+import { RoomInfoResponse } from "@/features/meeting/types/apiTypes";
 
 export class RoomService {
   // 모임 생성
@@ -7,7 +8,10 @@ export class RoomService {
     return apiClient.post<RoomInfoResponse>('/api/rooms', request);
   }
 
-
+  // 조회
+  async getRoomInfo(roomId: string): Promise<RoomInfoResponse> {
+    return apiClient.get<RoomInfoResponse>(`/api/rooms/${roomId}`);
+  }
 }
 
 // 싱글톤 인스턴스
