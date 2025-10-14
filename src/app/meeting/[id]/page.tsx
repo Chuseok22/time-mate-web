@@ -6,6 +6,8 @@ import BodySection from "@/components/BodySection";
 import { CalendarCheck } from "lucide-react";
 import TimeGridContainer from "@/features/meeting/containers/TimeGridContainer";
 import { TIME_SLOT_MAP } from "@/types/timeSlot";
+import { ErrorCode } from "@/lib/errors/errorCodes";
+import { CustomError } from "@/lib/errors/customError";
 
 // 가장 인기 있는 시간대 찾기
 function getMostPopularSlot(roomInfo: RoomInfoResponse): { date: string, timeSlot: string, count: number } | null {
@@ -41,6 +43,10 @@ export default async function MeetingPage({
       'Content-Type': 'application/json',
     },
   });
+
+  if (!response.ok) {
+    throw new CustomError(ErrorCode.INVALID_REQUEST);
+  }
 
   const roomInfo: RoomInfoResponse = await response.json();
 
