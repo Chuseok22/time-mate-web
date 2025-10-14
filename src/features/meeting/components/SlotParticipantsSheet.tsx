@@ -2,7 +2,7 @@
 
 import { ParticipantInfoResponse, RoomInfoResponse } from "@/features/meeting/types/apiTypes";
 import { JSX, useMemo } from "react";
-import { formatDateForDetailDisplay } from "@/utils/dateUtils";
+import { formatDateForDetailDisplay, toLocalDate } from "@/utils/dateUtils";
 import { TIME_SLOT_MAP } from "@/types/timeSlot";
 import { findDateEntry, findTimeSlotEntry } from "@/features/meeting/components/slotParticipantsSheetHelper";
 import BottomSheet from "@/components/BottomSheet";
@@ -27,7 +27,7 @@ export default function SlotParticipantsSheet({
     if (!date || !timeSlot) {
       return '';
     }
-    const { month, day, dayName } = formatDateForDetailDisplay(new Date(date));
+    const { month, day, dayName } = formatDateForDetailDisplay(toLocalDate(date));
     const label: string = TIME_SLOT_MAP[timeSlot] ?? timeSlot;
     return `${month}/${day} (${dayName}) - ${label}`;
   }, [date, timeSlot]);
