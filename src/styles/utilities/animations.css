@@ -1,0 +1,14 @@
+@keyframes bs-slide-up {
+  from {
+    transform: translateY(12px);
+    opacity: 0.0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.bs-animate-in {
+  animation: bs-slide-up 240ms ease-out both;
+}
