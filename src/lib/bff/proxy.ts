@@ -53,10 +53,11 @@ export function createProxy(config: ProxyConfig): ProxyHandler {
     try {
       const { path: segs } = await ctx.params;
       const path = Array.isArray(segs) ? segs.join('/') : '';
-      const target = joinUrl(config.backendBaseUrl, path, new URL(req.url).search);
+      const apiPath = path.startsWith('api/') ? path : `api/${path}`;
+      const target = joinUrl(config.backendBaseUrl, apiPath, new URL(req.url).search);
 
       // 요청 로깅
-      console.log(`[BFF] ${req.method} /${path} → ${target}`);
+      console.log(`[BFF] ${req.method} /${apiPath} → ${target}`);
 
       const upstreamHeaders = buildUpstreamHeaders(req, backendHost, config);
 
@@ -73,16 +74,16 @@ export function createProxy(config: ProxyConfig): ProxyHandler {
       });
 
       // 응답 로깅
-      console.log(`[BFF] /${path} 응답: ${upstream.status} ${upstream.statusText}`);
+      console.log(`[BFF] /${apiPath} 응답: ${upstream.status} ${upstream.statusText}`);
 
       // 에러 응답 처리
       if (!upstream.ok) {
-        console.error(`[BFF] /${path} API 오류: ${upstream.status}`);
+        console.error(`[BFF] /${apiPath} API 오류: ${upstream.status}`);
 
         // 에러 응답도 그대로 전달하되 로깅
         try {
           const errorData = await upstream.clone().json();
-          console.error(`[BFF] /${path} 에러 내용:`, errorData);
+          console.error(`[BFF] /${apiPath} 에러 내용:`, errorData);
         } catch {
           // JSON 파싱 실패 시 무시
         }

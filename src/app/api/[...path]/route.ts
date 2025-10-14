@@ -5,7 +5,7 @@ import { createProxy } from "@/lib/bff/proxy";
 const API_BASE_URL: string = process.env.API_BASE_URL ?? "";
 
 const proxy = createProxy({
-  backendBaseUrl: `${API_BASE_URL}/api`,
+  backendBaseUrl: API_BASE_URL,
   promoteCookieToAuth: { cookieName: 'accessToken', overwriteIfExists: false },
   stripRequestHeaders: ['content-length'],
 });
