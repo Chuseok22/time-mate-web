@@ -6,38 +6,19 @@ import { CalendarCheck } from "lucide-react";
 import TimeGridContainer from "@/features/meeting/containers/TimeGridContainer";
 import { TIME_SLOT_MAP } from "@/types/timeSlot";
 import { apiServer } from "@/lib/api/apiServer";
-
-// 가장 인기 있는 시간대 찾기
-function getMostPopularSlot(roomInfo: RoomInfoResponse): { date: string, timeSlot: string, count: number } | null {
-  let maxCount: number = 0;
-  let popularSlot: { date: string, timeSlot: string, count: number } | null = null;
-
-  roomInfo.dateAvailabilityResponses.forEach(dateResponse => {
-    dateResponse.timeSlotParticipantsResponses.forEach(timeSlotResponse => {
-      if (timeSlotResponse.availabilityCount > maxCount) {
-        maxCount = timeSlotResponse.availabilityCount;
-        popularSlot = {
-          date: dateResponse.date,
-          timeSlot: timeSlotResponse.timeSlot,
-          count: timeSlotResponse.availabilityCount
-        };
-      }
-    });
-  });
-
-  return popularSlot;
-}
+import { getMostPopularSlots } from "@/features/meeting/utils/helper";
+import { formatDateForDetailDisplay, toLocalDate } from "@/utils/dateUtils";
 
 export default async function MeetingPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }): Promise<JSX.Element> {
-  const { id: roomId } = await params;
+  const { id: roomId } = params;
 
   const roomInfo: RoomInfoResponse = await apiServer.get<RoomInfoResponse>(`/api/rooms/${roomId}`);
 
-  const mostPopularSlot = getMostPopularSlot(roomInfo);
+  const mostPopularSlots = getMostPopularSlots(roomInfo);
 
   return (
       <div className="min-h-screen bg-main">
@@ -63,12 +44,22 @@ export default async function MeetingPage({
 
               <div className="flex flex-col bg-main rounded-2xl gap-3 p-5 w-full">
                 <p className="text-lg text-blue-500 font-bold">
-                  가장 많은 투표
+                  가장 많은 투표 ({mostPopularSlots[0].count}명)
                 </p>
-                {mostPopularSlot ? (
-                    <p className="text-blue-500 font-bold">
-                      {mostPopularSlot.date} {TIME_SLOT_MAP[mostPopularSlot.timeSlot]} - {mostPopularSlot.count}명
-                    </p>
+                {mostPopularSlots.length > 0 ? (
+                    <ul className="space-y-1">
+                      {mostPopularSlots.map((slot) => {
+                        const { month, day, dayName } = formatDateForDetailDisplay(toLocalDate(slot.date))
+                        const timeLabel = TIME_SLOT_MAP[slot.timeSlot];
+
+                        return (
+                            <li key={`${slot.date}-${slot.timeSlot}`}
+                                className="text-blue-500 font-bold">
+                              {`${month}/${day} (${dayName}) ${timeLabel}`}
+                            </li>
+                        );
+                      })}
+                    </ul>
                 ) : (
                     <p className="text-gray-500">
                       아직 투표가 없습니다.
