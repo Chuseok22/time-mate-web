@@ -19,5 +19,6 @@ export interface RoomInfoResponse {
   title: string;
   dates: string[];
   participantsCount: number;
+  participantInfoResponses: ParticipantInfoResponse[];
   dateAvailabilityResponses: DateAvailabilityResponse[];
 }

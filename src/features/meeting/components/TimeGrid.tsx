@@ -1,6 +1,6 @@
 import { RoomInfoResponse } from "@/features/meeting/types/apiTypes";
 import { JSX } from "react";
-import { formatDateForDetailDisplay } from "@/utils/dateUtils";
+import { formatDateForDetailDisplay, toLocalDate } from "@/utils/dateUtils";
 import { ALL_TIME_SLOTS } from "@/types/timeSlot";
 import { getAvailabilityCount, getDayNameColor, getSelectedColor } from "@/features/meeting/components/timeGridHelper";
 import { getLabelOnlyOnHour } from "@/utils/timeSlotUtils";
@@ -27,7 +27,7 @@ export default function TimeGrid({
             >
 
               {roomInfo.dates.map((date: string) => {
-                const { month, day, dayName } = formatDateForDetailDisplay(new Date(date));
+                const { month, day, dayName } = formatDateForDetailDisplay(toLocalDate(date));
                 return (
                     <div
                         key={date}

@@ -15,6 +15,22 @@ export function formatDateForLocalDateTime(date: Date): string {
   return date.toISOString().slice(0, 19); // "2025-10-01T09:00:00"
 }
 
+// string -> Date
+export function toLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, (month ?? 1) - 1, day ?? 1, 0, 0, 0, 0);
+}
+
+/** [추가] 슬롯 정렬용: "SLOT_08_30" -> 분(min)으로 변환 */
+export function parseTimeSlotToMinutes(slot: string): number {
+  // 기대 포맷: SLOT_HH_MM
+  const m = slot.match(/^SLOT_(\d{2})_(\d{2})$/);
+  if (!m) return Number.MAX_SAFE_INTEGER;
+  const hh = Number(m[1]);
+  const mm = Number(m[2]);
+  return hh * 60 + mm;
+}
+
 // 상세 표시용 포맷
 export function formatDateForDetailDisplay(date: Date): { year: number, month: number; day: number; dayName: string } {
   const year = date.getFullYear();
@@ -25,11 +41,3 @@ export function formatDateForDetailDisplay(date: Date): { year: number, month: n
 
   return { year, month, day, dayName };
 }
-
-// 시간 표시용 포맷
-export function formatTimeForDisplay(date: Date): string {
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  return `${hours}:${minutes}`;
-}
-
