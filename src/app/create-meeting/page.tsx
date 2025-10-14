@@ -7,9 +7,9 @@ import { useRouter } from "next/navigation";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { CreateRoomRequest } from "@/features/create-meeting/types/apiTypes";
 import { formatDateForLocalDate } from "@/utils/dateUtils";
-import { roomService } from "@/features/meeting/api/roomService";
 import BodySection from "@/components/BodySection";
 import { RoomInfoResponse } from "@/features/meeting/types/apiTypes";
+import { apiClient } from "@/lib/api/apiClient";
 
 export default function CreateMeetingPage() {
   const router = useRouter();
@@ -39,7 +39,7 @@ export default function CreateMeetingPage() {
         title: title.trim(),
         dates: selectedDates.map(item => formatDateForLocalDate(item.date)),
       };
-      const roomInfoResponse: RoomInfoResponse = await roomService.createRoom(createRoomRequest);
+      const roomInfoResponse: RoomInfoResponse = await apiClient.post<RoomInfoResponse>('/api/rooms', createRoomRequest);
 
       router.push(`/meeting/${roomInfoResponse.meetingRoomId}`);
 

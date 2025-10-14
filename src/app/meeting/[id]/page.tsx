@@ -1,13 +1,11 @@
 import { RoomInfoResponse } from "@/features/meeting/types/apiTypes";
 import { JSX } from "react";
-import { ORIGIN_URL } from "@/lib/types";
 import Header from "@/components/Header";
 import BodySection from "@/components/BodySection";
 import { CalendarCheck } from "lucide-react";
 import TimeGridContainer from "@/features/meeting/containers/TimeGridContainer";
 import { TIME_SLOT_MAP } from "@/types/timeSlot";
-import { ErrorCode } from "@/lib/errors/errorCodes";
-import { CustomError } from "@/lib/errors/customError";
+import { apiServer } from "@/lib/api/apiServer";
 
 // 가장 인기 있는 시간대 찾기
 function getMostPopularSlot(roomInfo: RoomInfoResponse): { date: string, timeSlot: string, count: number } | null {
@@ -37,18 +35,7 @@ export default async function MeetingPage({
 }): Promise<JSX.Element> {
   const { id: roomId } = await params;
 
-  const response = await fetch(`${ORIGIN_URL}/api/rooms/${roomId}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    throw new CustomError(ErrorCode.INVALID_REQUEST);
-  }
-
-  const roomInfo: RoomInfoResponse = await response.json();
+  const roomInfo: RoomInfoResponse = await apiServer.get<RoomInfoResponse>(`/api/rooms/${roomId}`);
 
   const mostPopularSlot = getMostPopularSlot(roomInfo);
 

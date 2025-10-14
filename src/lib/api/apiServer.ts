@@ -1,23 +1,39 @@
-import { handleErrorResponse } from "@/lib/errors/errorResponse";
-import { ErrorCode } from "@/lib/errors/errorCodes";
+import { API_BASE_URL } from "@/lib/types";
 import { CustomError } from "@/lib/errors/customError";
+import { ErrorCode } from "@/lib/errors/errorCodes";
+import { handleErrorResponse } from "@/lib/errors/errorResponse";
 
-export class ApiClient {
+export class ApiServer {
+  private readonly baseUrl: string;
+
+  constructor(baseUrl?: string) {
+    this.baseUrl = baseUrl || API_BASE_URL || '';
+  }
+
+  /**
+   * 공통 요청 메서드
+   */
   async request<T>(
       endpoint: string,
       options: RequestInit = {}
   ): Promise<T> {
-    const controller = new AbortController();
+    const url = `${this.baseUrl}${endpoint}`;
+
+    // 서버 컴포넌트 로깅
+    console.log(`[SSR] ${options.method || 'GET'} ${endpoint} → ${url}`);
 
     try {
-      const response = await fetch(`${endpoint}`, {
+      const response = await fetch(url, {
         ...options,
-        signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
           ...options.headers,
         },
+        cache: 'no-store', // SSR 기본 캐시 정책
       });
+
+      // 응답 로깅
+      console.log(`[SSR] ${endpoint} 응답: ${response.status} ${response.statusText}`);
 
       if (!response.ok) {
         await handleErrorResponse(response);
@@ -25,12 +41,13 @@ export class ApiClient {
 
       return await response.json();
     } catch (error) {
+      // 서버 컴포넌트 에러 처리
+      console.error(`[SSR] ${endpoint} 요청 중 오류:`, error);
+
       if (error instanceof CustomError) {
         throw error;
       } else if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          throw new CustomError(ErrorCode.TIMEOUT_ERROR, 408);
-        } else if (error.message.includes('fetch')) {
+        if (error.message.includes('fetch')) {
           throw new CustomError(ErrorCode.NETWORK_ERROR, 0);
         }
       }
@@ -38,9 +55,9 @@ export class ApiClient {
     }
   }
 
-  // 편의 메서드 (GET, POST, PUT, PATCH, DELETE)
+  // 편의 메서드
   async get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET' })
+    return this.request<T>(endpoint, { method: 'GET' });
   }
 
   async post<T>(endpoint: string, data?: unknown): Promise<T> {
@@ -69,5 +86,5 @@ export class ApiClient {
   }
 }
 
-// 싱글톤 인스턴스
-export const apiClient = new ApiClient();
+// 서버 컴포넌트용 싱글톤 인스턴스
+export const apiServer = new ApiServer();
