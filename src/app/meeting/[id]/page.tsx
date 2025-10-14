@@ -12,9 +12,9 @@ import { formatDateForDetailDisplay, toLocalDate } from "@/utils/dateUtils";
 export default async function MeetingPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }): Promise<JSX.Element> {
-  const { id: roomId } = params;
+  const { id: roomId } = await params;
 
   const roomInfo: RoomInfoResponse = await apiServer.get<RoomInfoResponse>(`/api/rooms/${roomId}`);
 
