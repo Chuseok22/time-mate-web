@@ -45,19 +45,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-      <html lang="ko" className={`${pacifico.variable}`}>
-      <meta name="mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-      <meta name="format-detection" content="telephone=no" />
-      <body
-          // Tailwind 전역 클래스: 안전한 영역(p-safe)과 가독성을 위한 기본 레이아웃
-          className="min-h-screen-safe bg-white text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-50"
-      >
-      {/* 안전영역 패딩: iOS 노치/홈인디케이터 대응 */}
-      <div className="min-h-screen-safe pt-safe-top pr-safe-right pb-safe-bottom pl-safe-left bg-red-50 mx-auto w-full max-w-screen-lg"> {/*TODO: bg-red-50 -> bg-main 변경 필요*/}
-        {children}
+      <html lang="ko" className={pacifico.variable}>
+      <body className="min-h-screen-safe bg-white text-gray-900 antialiased">
+
+      {/* ===== Color Shims: safe-area 배경을 강제로 'white'로 칠함 ===== */}
+      <div
+          className="fixed top-0 left-0 right-0 z-[60] bg-white dark:bg-gray-950"
+          style={{ height: "env(safe-area-inset-top, 0)" }}
+          aria-hidden
+      />
+      <div
+          className="fixed bottom-0 left-0 right-0 z-[60] bg-white dark:bg-gray-950"
+          style={{ height: "env(safe-area-inset-bottom, 0)" }}
+          aria-hidden
+      />
+      {/* =========================================================== */}
+
+      <div className="min-h-screen-safe pt-safe-top pr-safe-right pb-safe-bottom pl-safe-left">
+        <div className="mx-auto w-full max-w-screen-lg">
+          {children}
+        </div>
       </div>
+
       </body>
       </html>
   );
