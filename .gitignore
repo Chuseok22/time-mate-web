@@ -71,12 +71,6 @@ keystore.properties
 store_icon.png
 
 # Android Gradle 파일들
-/build.gradle
-/gradle.properties
-/gradlew
-/gradlew.bat
-/gradle/
-/settings.gradle
 local.properties
 
 # Android Studio / IntelliJ
