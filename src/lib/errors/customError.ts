@@ -10,7 +10,7 @@ export class CustomError extends Error {
       statusCode: number = 500,
       customMessage?: string
   ) {
-    const message = customMessage || ERROR_MESSAGES[code] || '알 수 없는 오류가 발생했습니다.';
+    const message = ERROR_MESSAGES[code] || '알 수 없는 오류가 발생했습니다.';
     super(message);
 
     this.name = 'CustomError';

@@ -11,6 +11,7 @@ export enum ErrorCode {
 
   // MeetingRoom
   MEETING_ROOM_NOT_FOUND = 'MEETING_ROOM_NOT_FOUND',
+  BASE_58_JOIN_CODE_PATTERN_MISMATCH = 'BASE_58_JOIN_CODE_PATTERN_MISMATCH',
 }
 
 // 에러 메시지 매핑
@@ -24,4 +25,5 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ErrorCode.INVALID_RESPONSE_FORMAT]: '올바른 응답 형태가 아닙니다.',
 
   [ErrorCode.MEETING_ROOM_NOT_FOUND]: '모임을 찾을 수 없습니다.',
+  [ErrorCode.BASE_58_JOIN_CODE_PATTERN_MISMATCH]: '올바른 모임 코드를 입력해주세요',
 };
