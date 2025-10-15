@@ -9,6 +9,7 @@ import { apiServer } from "@/lib/api/apiServer";
 import { getMostPopularSlots } from "@/features/meeting/utils/helper";
 import { formatDateForDetailDisplay, toLocalDate } from "@/utils/dateUtils";
 import CopyButton from "@/features/meeting/components/CopyButton";
+import JoinParticipantSheet from "@/features/meeting/components/JoinParticipantSheet";
 
 export default async function MeetingPage({
   params,
@@ -27,7 +28,7 @@ export default async function MeetingPage({
         <main className="main-container">
           <BodySection>
             <div className="flex flex-col w-full gap-6">
-              <div className="flex flex-row w-10/12 items-center justify-center gap-3">
+              <div className="flex flex-row w-full items-center justify-center gap-3">
                 <div className="flex flex-1 items-center justify-center">
                   <div className="bg-main p-3.5 rounded-2xl">
                     <CalendarCheck />
@@ -75,11 +76,12 @@ export default async function MeetingPage({
 
           <BodySection>
             <div className="flex flex-col w-full gap-4">
-              <h2 className="text-xl font-semibold">날짜 선택</h2>
-              <div className="flex flex-row">
-                <div className="font-semibold text-lg mb-4">
+              <h2 className="text-xl font-semibold">일정 조회</h2>
+              <div className="flex flex-row justify-between items-center mb-2">
+                <div className="font-semibold text-lg">
                   참여자: <span className="text-xl font-bold text-blue-500">{roomInfo.participantsCount}</span> 명
                 </div>
+                <JoinParticipantSheet roomId={roomId} />
               </div>
             </div>
 
