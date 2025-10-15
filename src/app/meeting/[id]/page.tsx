@@ -8,6 +8,7 @@ import { TIME_SLOT_MAP } from "@/types/timeSlot";
 import { apiServer } from "@/lib/api/apiServer";
 import { getMostPopularSlots } from "@/features/meeting/utils/helper";
 import { formatDateForDetailDisplay, toLocalDate } from "@/utils/dateUtils";
+import CopyButton from "@/features/meeting/components/CopyButton";
 
 export default async function MeetingPage({
   params,
@@ -32,12 +33,15 @@ export default async function MeetingPage({
                     <CalendarCheck />
                   </div>
                 </div>
-                <div className="flex flex-col flex-5 gap-1">
-                  <div className="text-xl font-bold">
+                <div className="flex flex-col flex-5 gap-2">
+                  <div className="text-lg font-bold">
                     {roomInfo.title}
                   </div>
-                  <div>
-                    모임 코드: {roomId}
+                  <div className="flex flex-row items-center gap-2">
+                    <div className="font-semibold">
+                      모임 코드: {roomInfo.joinCode}
+                    </div>
+                    <CopyButton joinCode={roomInfo.joinCode} />
                   </div>
                 </div>
               </div>
