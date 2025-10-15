@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api/apiClient";
 import { RoomInfoResponse } from "@/features/meeting/types/apiTypes";
 import { CustomError } from "@/lib/errors/customError";
+import { normalizedString } from "@/utils/stringUtils";
 
 export default function JoinCodeForm() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function JoinCodeForm() {
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-    const normalized = joinCode.trim().replace(/\s+/g, "");
+    const normalized: string = normalizedString(joinCode);
     if (!normalized) {
       return;
     }
