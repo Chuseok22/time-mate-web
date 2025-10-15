@@ -23,3 +23,9 @@ export interface RoomInfoResponse {
   participantInfoResponses: ParticipantInfoResponse[];
   dateAvailabilityResponses: DateAvailabilityResponse[];
 }
+
+export interface CreateParticipantRequest {
+  meetingRoomId: string;
+  username: string;
+  password?: string;
+}
