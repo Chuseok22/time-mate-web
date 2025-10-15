@@ -22,7 +22,7 @@ export default function JoinCodeForm() {
     }
     setIsLoading(true);
     try {
-      const response: RoomInfoResponse = await apiClient.get(`/api/rooms/join-code/${joinCode}`);
+      const response: RoomInfoResponse = await apiClient.get(`/api/rooms/join-code/${normalized}`);
       router.replace(`/meeting/${response.meetingRoomId}`);
     } catch (err: unknown) {
       if (err instanceof CustomError) {
