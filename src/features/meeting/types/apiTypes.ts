@@ -17,6 +17,7 @@ export interface DateAvailabilityResponse {
 export interface RoomInfoResponse {
   meetingRoomId: string;
   title: string;
+  joinCode: string;
   dates: string[];
   participantsCount: number;
   participantInfoResponses: ParticipantInfoResponse[];
