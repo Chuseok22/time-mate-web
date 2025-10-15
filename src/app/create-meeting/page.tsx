@@ -66,7 +66,7 @@ export default function CreateMeetingPage() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="모임 제목을 입력하세요"
-                    className="ring-gray-100 ring-2 outline-none p-3.5 rounded-2xl focus:ring-blue-500"
+                    className="input-primary"
                     disabled={isLoading}
                 />
               </div>
