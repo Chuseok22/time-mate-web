@@ -5,14 +5,24 @@ export function isSameDate(date1: Date, date2: Date): boolean {
       date1.getDate() === date2.getDate();
 }
 
-// LocalDate 형태
+// LocalDate(시스템 타임존) 기준 YYYY-MM-DD 문자열
 export function formatDateForLocalDate(date: Date): string {
-  return date.toISOString().split('T')[0]; // "2025-10-01"
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
-// LocalDateTime 형태 변환
+// LocalDateTime(시스템 타임존) 기준 YYYY-MM-DDTHH:mm:ss 문자열
+// (백엔드에서 LocalDateTime으로 파싱하기 좋은 형태)
 export function formatDateForLocalDateTime(date: Date): string {
-  return date.toISOString().slice(0, 19); // "2025-10-01T09:00:00"
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  const ss = String(date.getSeconds()).padStart(2, '0');
+  return `${y}-${m}-${d}T${hh}:${mm}:${ss}`;
 }
 
 // string -> Date

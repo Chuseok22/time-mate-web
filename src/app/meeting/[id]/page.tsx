@@ -44,7 +44,7 @@ export default async function MeetingPage({
 
               <div className="flex flex-col bg-main rounded-2xl gap-3 p-5 w-full">
                 <p className="text-lg text-blue-500 font-bold">
-                  가장 많은 투표 ({mostPopularSlots.length === 0 ? '0명' : mostPopularSlots[0].count}명)
+                  가장 많은 투표 ({mostPopularSlots.length === 0 ? '0' : mostPopularSlots[0].count}명)
                 </p>
                 {mostPopularSlots.length > 0 ? (
                     <ul className="space-y-1">
