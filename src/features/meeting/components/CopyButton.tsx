@@ -2,14 +2,19 @@
 import { JSX, useEffect, useState } from "react";
 import clsx from "clsx";
 import { Check, Copy } from "lucide-react";
+import { generateInviteMessage } from "@/features/meeting/templates/inviteTemplate";
 
 interface CopyButtonProps {
+  title: string
+  url: string,
   joinCode: string;
   className?: string;
   successDurationMs?: number;
 }
 
 export default function CopyButton({
+  title,
+  url,
   joinCode,
   className,
   successDurationMs = 1500,
@@ -18,7 +23,11 @@ export default function CopyButton({
   const [copied, setCopied] = useState<boolean>(false);
 
   async function copyToClipboard() {
-    await navigator.clipboard.writeText(joinCode);
+    try {
+      await navigator.clipboard.writeText(generateInviteMessage({ title, url, joinCode }));
+    } catch {
+      await navigator.clipboard.writeText(joinCode);
+    }
     setCopied(true);
   }
 

@@ -11,6 +11,7 @@ import { formatDateForDetailDisplay, toLocalDate } from "@/utils/dateUtils";
 import CopyButton from "@/features/meeting/components/CopyButton";
 import JoinParticipantSheet from "@/features/meeting/components/JoinParticipantSheet";
 import { BottomSheetProvider } from "@/components/BottomSheetProvider";
+import { ORIGIN_URL } from "@/lib/types";
 
 export default async function MeetingPage({
   params,
@@ -44,7 +45,10 @@ export default async function MeetingPage({
                       <div className="font-semibold">
                         모임 코드: {roomInfo.joinCode}
                       </div>
-                      <CopyButton joinCode={roomInfo.joinCode} />
+                      <CopyButton
+                          title={roomInfo.title}
+                          url={`${ORIGIN_URL}/meeting/${roomInfo.meetingRoomId}`}
+                          joinCode={roomInfo.joinCode} />
                     </div>
                   </div>
                 </div>
