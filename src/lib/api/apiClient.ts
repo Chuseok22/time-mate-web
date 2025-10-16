@@ -23,6 +23,10 @@ export class ApiClient {
         await handleErrorResponse(response);
       }
 
+      if (response.status === 204 || response.headers.get('content-length') === '0') {
+        return undefined as T;
+      }
+
       return await response.json();
     } catch (error) {
       if (error instanceof CustomError) {
