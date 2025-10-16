@@ -29,3 +29,13 @@ export interface CreateParticipantRequest {
   username: string;
   password?: string;
 }
+
+export interface AvailabilityTimeRequest {
+  date: string;
+  timeSlots: string[];
+}
+
+export interface AvailabilityRequest {
+  participantId: string;
+  availabilityTimeRequests: AvailabilityTimeRequest[];
+}
