@@ -1,5 +1,8 @@
 'use client';
 import { createContext, ReactNode, useCallback, useContext, useState } from "react";
+import { CustomError } from "@/lib/errors/customError";
+import { error } from "next/dist/build/output/log";
+import { ErrorCode } from "@/lib/errors/errorCodes";
 
 type BottomSheetId = string;
 
@@ -38,7 +41,8 @@ export function BottomSheetProvider({
 export function useBottomSheet() {
   const ctx = useContext(BottomSheetContext);
   if (!ctx) {
-    throw new Error("useBottomSheet must be used within BottomSheetProvider");
+    console.error("useBottomSheet must be used within BottomSheetProvider")
+    throw new CustomError(ErrorCode.UNKNOWN_ERROR);
   }
   return ctx;
 }
