@@ -134,8 +134,9 @@ export default function JoinParticipantForm({
             <div className="font-bold">투표 방법</div>
           </div>
           <div className="text-sm font-semibold">
-            다음 화면에서 가능한 시간대를 클릭하여 선택하세요.<br />
-            선택한 시간은 파란색으로 표시됩니다.
+            가능한 시간을 클릭하여 투표하세요.<br />
+            선택한 시간은 초록색으로 표시됩니다.<br/>
+            다른 사용자들이 투표한 결과는 파란색으로 표시됩니다.
           </div>
         </div>
       </form>
