@@ -4,7 +4,7 @@ import { FormEvent, JSX, useState } from "react";
 import { useRouter } from "next/navigation";
 import { normalizedString } from "@/utils/stringUtils";
 import { apiClient } from "@/lib/api/apiClient";
-import { CreateParticipantRequest } from "@/features/meeting/types/apiTypes";
+import { CreateParticipantRequest, ParticipantInfoResponse } from "@/features/meeting/types/apiTypes";
 import { CustomError } from "@/lib/errors/customError";
 import { Info } from "lucide-react";
 import clsx from "clsx";
@@ -28,10 +28,10 @@ export default function JoinParticipantForm({
     e.preventDefault();
     setError(null);
 
-    const normalizedUsername = normalizedString(username);
+    const trimmedUsername = username.trim();
     const normalizedPassword = normalizedString(password) || undefined;
 
-    if (!normalizedUsername) {
+    if (!trimmedUsername) {
       setError("이름을 입력하세요");
       return;
     }
@@ -41,11 +41,11 @@ export default function JoinParticipantForm({
     try {
       const request: CreateParticipantRequest = {
         meetingRoomId: roomId,
-        username: normalizedUsername,
+        username: trimmedUsername,
         password: normalizedPassword,
       };
-      await apiClient.post(`/api/participant`, request);
-      router.replace(`/meeting/${roomId}/vote`);
+      const response: ParticipantInfoResponse = await apiClient.post(`/api/participant`, request);
+      router.push(`/meeting/${roomId}/vote?participantId=${response.participantId}&username=${encodeURIComponent(response.username)}`);
     } catch (err: unknown) {
       if (err instanceof CustomError) {
         setError(err.userMessage);
@@ -134,8 +134,9 @@ export default function JoinParticipantForm({
             <div className="font-bold">투표 방법</div>
           </div>
           <div className="text-sm font-semibold">
-            다음 화면에서 가능한 시간대를 클릭하여 선택하세요.<br />
-            선택한 시간은 파란색으로 표시됩니다.
+            가능한 시간을 클릭하여 투표하세요.<br />
+            선택한 시간은 초록색으로 표시됩니다.<br/>
+            다른 사용자들이 투표한 결과는 파란색으로 표시됩니다.
           </div>
         </div>
       </form>

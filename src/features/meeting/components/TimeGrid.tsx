@@ -2,17 +2,28 @@ import { RoomInfoResponse } from "@/features/meeting/types/apiTypes";
 import { JSX } from "react";
 import { formatDateForDetailDisplay, toLocalDate } from "@/utils/dateUtils";
 import { ALL_TIME_SLOTS } from "@/types/timeSlot";
-import { getAvailabilityCount, getDayNameColor, getSelectedColor } from "@/features/meeting/components/timeGridHelper";
+import {
+  getAvailabilityCount,
+  getDayNameColor,
+  getSelectedColor,
+  isSlotSelected
+} from "@/features/meeting/components/timeGridHelper";
 import { getLabelOnlyOnHour } from "@/utils/timeSlotUtils";
+import { SelectedMap } from "@/features/meeting/components/TimeGridVote";
 
 interface TimeGridProps {
   roomInfo: RoomInfoResponse;
   onTimeSlotClick?: (date: string, timeSlot: string) => void;
+  // 투표를 위한 추가 props
+  selectedSlots?: SelectedMap;
+  isVoteMode?: boolean;
 }
 
 export default function TimeGrid({
   roomInfo,
   onTimeSlotClick,
+  selectedSlots,
+  isVoteMode = false,
 }: TimeGridProps): JSX.Element {
   const gridCols = `repeat(${roomInfo.dates.length}, 100px)`;
 
@@ -54,7 +65,13 @@ export default function TimeGrid({
                   >
                     {roomInfo.dates.map((date) => {
                       const count = getAvailabilityCount(roomInfo, date, slot);
-                      const colorClass = getSelectedColor(count, roomInfo.participantsCount);
+                      const isSelected = isSlotSelected(date, slot, selectedSlots);
+                      let colorClass: string
+                      if (isVoteMode && isSelected) {
+                        colorClass = "bg-green-500 text-white";
+                      } else {
+                        colorClass = getSelectedColor(count, roomInfo.participantsCount);
+                      }
 
                       return (
                           <button

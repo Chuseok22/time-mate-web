@@ -1,4 +1,5 @@
 import { RoomInfoResponse } from "@/features/meeting/types/apiTypes";
+import { SelectedMap } from "@/features/meeting/components/TimeGridVote";
 
 export function getSelectedColor(count: number, maxCount: number): string {
   if (count === 0) return 'bg-gray-200 hover:bg-gray-300 text-gray-400 hover:text-gray-500';
@@ -24,4 +25,12 @@ export function getDayNameColor(dayName: string): string {
   } else {
     return "text-black";
   }
+}
+
+export function isSlotSelected(
+    date: string,
+    timeSlot: string,
+    selectedSlots?: SelectedMap,
+): boolean {
+  return selectedSlots?.get(date)?.has(timeSlot) ?? false;
 }
