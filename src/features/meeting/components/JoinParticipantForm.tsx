@@ -28,10 +28,10 @@ export default function JoinParticipantForm({
     e.preventDefault();
     setError(null);
 
-    const normalizedUsername = normalizedString(username);
+    const trimmedUsername = username.trim();
     const normalizedPassword = normalizedString(password) || undefined;
 
-    if (!normalizedUsername) {
+    if (!trimmedUsername) {
       setError("이름을 입력하세요");
       return;
     }
@@ -41,11 +41,11 @@ export default function JoinParticipantForm({
     try {
       const request: CreateParticipantRequest = {
         meetingRoomId: roomId,
-        username: normalizedUsername,
+        username: trimmedUsername,
         password: normalizedPassword,
       };
       const response: ParticipantInfoResponse = await apiClient.post(`/api/participant`, request);
-      router.replace(`/meeting/${roomId}/vote?participantId=${response.participantId}&username=${response.username}`);
+      router.push(`/meeting/${roomId}/vote?participantId=${response.participantId}&username=${encodeURIComponent(response.username)}`);
     } catch (err: unknown) {
       if (err instanceof CustomError) {
         setError(err.userMessage);
