@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import BodySection from "@/components/BodySection";
 import { CalendarCheck } from "lucide-react";
 import CopyButton from "@/features/meeting/components/CopyButton";
+import { ORIGIN_URL } from "@/lib/types";
 
 type searchParams = Record<string, string>;
 
@@ -51,7 +52,10 @@ export default async function VotePage({
                     <div className="font-semibold">
                       모임 코드: {roomInfo.joinCode}
                     </div>
-                    <CopyButton joinCode={roomInfo.joinCode} />
+                    <CopyButton
+                        title={roomInfo.title}
+                        url={`${ORIGIN_URL}/meeting/${roomInfo.meetingRoomId}`}
+                        joinCode={roomInfo.joinCode} />
                   </div>
                 </div>
               </div>
