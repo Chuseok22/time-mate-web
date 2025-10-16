@@ -34,6 +34,13 @@ export default function BottomSheet({
   const minPct = useMemo(() => 5, []); // 드래그 중 내부 보정용 실제 최소치
   const maxPct = useMemo(() => maxHeightPct, [maxHeightPct]);
 
+  useEffect(() => {
+    if (isOpen) {
+      setHeightPct(calculateHeight(initialHeightPct, minPct, maxPct));
+      setDragging(false);
+    }
+  }, [isOpen, initialHeightPct, minPct, maxPct]);
+
   const onEsc = useCallback(
       (e: KeyboardEvent) => {
         if (e.key === 'Escape') onClose();
