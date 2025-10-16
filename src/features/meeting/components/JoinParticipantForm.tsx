@@ -4,7 +4,7 @@ import { FormEvent, JSX, useState } from "react";
 import { useRouter } from "next/navigation";
 import { normalizedString } from "@/utils/stringUtils";
 import { apiClient } from "@/lib/api/apiClient";
-import { CreateParticipantRequest } from "@/features/meeting/types/apiTypes";
+import { CreateParticipantRequest, ParticipantInfoResponse } from "@/features/meeting/types/apiTypes";
 import { CustomError } from "@/lib/errors/customError";
 import { Info } from "lucide-react";
 import clsx from "clsx";
@@ -44,8 +44,8 @@ export default function JoinParticipantForm({
         username: normalizedUsername,
         password: normalizedPassword,
       };
-      await apiClient.post(`/api/participant`, request);
-      router.replace(`/meeting/${roomId}/vote`);
+      const response: ParticipantInfoResponse = await apiClient.post(`/api/participant`, request);
+      router.replace(`/meeting/${roomId}/vote?participantId=${response.participantId}&username=${response.username}`);
     } catch (err: unknown) {
       if (err instanceof CustomError) {
         setError(err.userMessage);
