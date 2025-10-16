@@ -1,7 +1,6 @@
 'use client';
 import { createContext, ReactNode, useCallback, useContext, useState } from "react";
 import { CustomError } from "@/lib/errors/customError";
-import { error } from "next/dist/build/output/log";
 import { ErrorCode } from "@/lib/errors/errorCodes";
 
 type BottomSheetId = string;

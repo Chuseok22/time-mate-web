@@ -31,7 +31,7 @@ export default function TimeGridContainer({ roomInfo }: TimeGridContainerProps):
     if (activeId !== SHEET_ID && selectedSlot) {
       setSelectedSlot(null);
     }
-  }, [activeId, selectedSlot]);
+  }, [activeId]);
 
   return (
       <>

@@ -8,7 +8,7 @@ import { CreateParticipantRequest } from "@/features/meeting/types/apiTypes";
 import { CustomError } from "@/lib/errors/customError";
 import { Info } from "lucide-react";
 import clsx from "clsx";
-import { ErrorCode } from "@/lib/errors/errorCodes";
+import { ERROR_MESSAGES, ErrorCode } from "@/lib/errors/errorCodes";
 
 interface JoinParticipantFormProps {
   roomId: string;
@@ -50,7 +50,7 @@ export default function JoinParticipantForm({
       if (err instanceof CustomError) {
         setError(err.userMessage);
       } else {
-        setError(ErrorCode.UNKNOWN_ERROR);
+        setError(ERROR_MESSAGES[ErrorCode.UNKNOWN_ERROR]);
       }
     } finally {
       setIsLoading(false);
@@ -104,7 +104,7 @@ export default function JoinParticipantForm({
               disabled={isLoading}
               autoComplete="off"
               minLength={1}
-              max={50}
+              maxLength={50}
               aria-invalid={false}
           />
           <div className="text-sm lg:text-base text-red-500">
