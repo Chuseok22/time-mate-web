@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # release 커밋 ([skip ci])로 재실행되는 러너는 탈출
-    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip ci]') }}
+    if: ${{ github.event_name != 'push' || (github.event.head_commit != null && !contains(github.event.head_commit.message, '[skip ci]')) }}
 
     steps:
       - name: 코드 체크아웃
@@ -42,17 +42,7 @@ jobs:
           BEFORE: ${{ github.event.before }}
           AFTER: ${{ github.sha }}
         run: |
-          set -Eeuo pipefail
-          if [[ -z "${AFTER:-}" ]]; then AFTER="$(git rev-parse HEAD)"; fi
-          if [[ -n "${BEFORE:-}" && "$BEFORE" =~ ^0{40}$ ]]; then
-            RANGE="$AFTER"
-          elif [[ -n "${BEFORE:-}" ]]; then
-            RANGE="${BEFORE}..${AFTER}"
-          else
-            RANGE="$AFTER"
-          fi
-
-          COMMITS="$(git log --format=%B "$RANGE" || true)"
+          COMMIT_MSG="$(git log -1 --format=%s)"
           echo "commit-message=$COMMIT_MSG" >> $GITHUB_OUTPUT
           
           # 버전 타입 확인
@@ -130,9 +120,12 @@ jobs:
           TZ: Asia/Seoul
         run: |
           NEW_VERSION="${{ steps.new-version.outputs.new }}"
+          COMMIT_MSG="${{ steps.check-commit.outputs.commit-message }}"
           VERSION_TYPE="${{ steps.check-commit.outputs.version-type }}"
-          DESCRIPTION="${{ steps.check-commit.outputs.description }}"
           DATE=$(date '+%Y-%m-%d')
+          
+          # 커밋 메시지에서 설명 부분 추출
+          DESCRIPTION=$(echo "$COMMIT_MSG" | sed 's/^version([^)]*): //')
           
           # 버전 타입 이모지
           case $VERSION_TYPE in
@@ -164,6 +157,7 @@ jobs:
 
       - name: 🏷️ Git Tag 생성
         if: steps.check-commit.outputs.should-update == 'true'
+        id: git-tag
         run: |
           NEW_VERSION="${{ steps.new-version.outputs.new }}"
           COMMIT_MSG="${{ steps.check-commit.outputs.commit-message }}"
@@ -194,10 +188,13 @@ jobs:
         if: steps.check-commit.outputs.should-update == 'true'
         run: |
           NEW_VERSION="${{ steps.new-version.outputs.new }}"
+          TAG_EXISTED="${{ steps.git-tag.outputs.tag-existed }}"
           
           # 변경사항과 태그 푸시
           git push origin main
-          git push origin "v$NEW_VERSION"
+          if [ "$TAG_EXISTED" != "true" ]; then
+            git push origin "v$NEW_VERSION"
+          fi
           
           echo "📤 변경사항 푸시 완료"
 
