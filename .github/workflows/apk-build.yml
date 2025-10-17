@@ -155,14 +155,22 @@ jobs:
       - name: 📱 Install Bubblewrap CLI
         run: |
           echo "📱 Bubblewrap CLI 설치 중..."
-          npm install -g @bubblewrap/cli
-          # 비대화형 설정 주입
-          bubblewrap updateConfig \
-            --jdkPath "${JAVA_HOME}" \
-            --androidSdkPath "${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          
+          # 🎯 printf로 여러 번 "n" 응답 준비
+          printf "n\nn\nn\nn\nn\n" | npm install -g @bubblewrap/cli --silent
+          
+          # 🔧 설정 파일 직접 생성 (더 안전)
+          mkdir -p ~/.bubblewrap
+          cat > ~/.bubblewrap/config.json << EOF
+          {
+            "jdkPath": "$JAVA_HOME",
+            "androidSdkPath": "${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          }
+          EOF
+          
+          # 🔎 설치 및 설정 확인
           bubblewrap --version
-          bubblewrap doctor || true
-          echo "✅ Bubblewrap CLI 설치/설정 완료"
+          echo "✅ Bubblewrap CLI 설치 완료"
           
           # 🔍 설정 확인
           echo "🔍 Bubblewrap 설정:"
