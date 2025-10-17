@@ -1,9 +1,11 @@
 name: APK Build & Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_run:
+    workflows:
+      - Version Management
+    types:
+      - completed
 
   workflow_dispatch:
     inputs:
@@ -26,6 +28,55 @@ permissions:
   actions: read
 
 jobs:
+  # 1) 어떤 태그를 빌드할지 결정
+  resolve-tag:
+    name: 🔎 Resolve Tag
+    runs-on: ubuntu-latest
+    # Version Management 성공(run) 또는 수동 실행(dispatch)만 허용
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+
+    outputs:
+      tag: ${{ steps.get-tag.outputs.tag }}
+      version: ${{ steps.get-tag.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve tag from event
+        id: get-tag
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            # Version Management가 만든 릴리스 커밋의 SHA
+            SHA="${{ github.event.workflow_run.head_sha }}"
+            git fetch --tags --force
+
+            # 해당 SHA를 가리키는 vX.Y.Z 태그 추출(여러 개면 가장 큰 버전 선택)
+            TAG="$(git tag --points-at "$SHA" | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1 || true)"
+            if [ -z "$TAG" ]; then
+              echo "❌ 태그를 찾을 수 없습니다. SHA=$SHA 에 vX.Y.Z 태그가 없습니다."
+              exit 1
+            fi
+          fi
+
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ 잘못된 태그 형식: $TAG (v1.2.3 형식이어야 함)"
+            exit 1
+          fi
+
+          VERSION="${TAG#v}"
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "✅ Resolved: TAG=$TAG, VERSION=$VERSION"
+
+  # 2) 실제 apk 빌드 & 릴리스
   build-apk:
     name: 🤖 Build MeetTime Android APK
     runs-on: ubuntu-latest
