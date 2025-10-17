@@ -207,7 +207,7 @@ jobs:
       - name: 🌐 Initialize TWA Project
         run: |
           cd android-build
-          VERSION="${{ steps.version.outputs.version }}"
+          VERSION="${{ needs.check-version-update.outputs.version }}"
           
           bubblewrap init \
             --manifest ${{ env.WEBSITE_URL }}/manifest.webmanifest \
