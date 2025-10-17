@@ -258,20 +258,21 @@ jobs:
           echo "✅ bubblewrap update 완료 (비대화형)"
 
       - name: 🏗️ Build Signed APK
+        env:
+          BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           cd android-build
           
-          # Gradle wrapper 권한 설정
+          # Gradle wrapper 권한
           if [ -f "gradlew" ]; then
             chmod +x gradlew
           fi
           
-          # 🔐 기존 키스토어로 서명된 APK 빌드
+          # 비대화형 빌드 (비밀번호는 env로 전달)
           bubblewrap build \
             --skipPwaValidation \
-            --keystore android.keystore \
-            --keystorePassword "${{ secrets.KEYSTORE_PASSWORD }}" \
-            --keyPassword "${{ secrets.KEY_PASSWORD }}" \
+            --keystore ./android.keystore \
             --alias android
           
           echo "✅ 서명된 APK 빌드 완료 (alias: android)"
