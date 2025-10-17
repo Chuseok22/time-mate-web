@@ -204,44 +204,65 @@ jobs:
           
           echo "✅ 프로덕션 키스토어 복원 완료 (alias: android)"
 
-      - name: 📝 Generate twa-manifest.json (CI-safe)   # FIX
+      - name: 📝 Generate twa-manifest.json (CI-safe)
+        env:
+          VERSION: ${{ needs.check-version-update.outputs.version }}
         run: |
           cd android-build
-          VERSION="${{ needs.check-version-update.outputs.version }}"
-          HOST=$(node -e "console.log(new URL(process.env.WEBSITE_URL).host)")
-          APP_VERSION_CODE="$(echo "$VERSION" | tr -d '.')$(date +%m%d)"
-
-          cat > twa-manifest.json <<JSON
-          {
-            "packageId": "${{ env.PACKAGE_ID }}",
-            "host": "${HOST}",
-            "name": "${{ env.APP_NAME }}",
-            "launcherName": "${{ env.APP_NAME }}",
-            "display": "standalone",
-            "orientation": "portrait",
-            "themeColor": "#3b82f6",
-            "backgroundColor": "#ffffff",
-            "startUrl": "/",
-            "iconUrl": "${{ env.WEBSITE_URL }}/icons/icon-512x512.png",
-            "maskableIconUrl": "${{ env.WEBSITE_URL }}/icons/icon-512x512.png",
-            "splashScreenFadeOutDuration": 300,
-            "enableNotifications": true,
-            "minSdkVersion": 21,
-            "targetSdkVersion": ${{ env.ANDROID_API_LEVEL }},
-            "appVersionName": "${VERSION}",
-            "appVersionCode": ${APP_VERSION_CODE},
-            "webManifestUrl": "${{ env.WEBSITE_URL }}/manifest.webmanifest",
-            "signingKey": {
-              "path": "./android.keystore",
-              "alias": "android"
+          
+          node <<'NODE'
+          const fs = require('fs');
+          
+          const env = process.env;
+          const version = env.VERSION;                    // e.g. "0.1.1"
+          const [maj, min, pat] = version.split('.').map(n => parseInt(n, 10));
+          
+          // 날짜(UTC)로 버전코드 가산값 생성 (MMDD => 정수, 리딩 제로 제거)
+          const now = new Date();
+          const mm = now.getUTCMonth() + 1;  // 1~12
+          const dd = now.getUTCDate();       // 1~31
+          const dateNum = mm * 100 + dd;     // e.g. 10월17일 => 1017
+          
+          // appVersionCode: 리딩 제로 없는 정수. 포맷: M*1e6 + m*1e4 + p*1e2 + MMDD
+          const appVersionCode = maj * 1_000_000 + min * 10_000 + pat * 100 + dateNum;
+          
+          const host = new URL(env.WEBSITE_URL).host;
+          
+          const manifest = {
+            packageId: env.PACKAGE_ID,
+            host,
+            name: env.APP_NAME,
+            launcherName: env.APP_NAME,
+            display: "standalone",
+            orientation: "portrait",
+            themeColor: "#3b82f6",
+            backgroundColor: "#ffffff",
+            startUrl: "/",
+            iconUrl: `${env.WEBSITE_URL}/icons/icon-512x512.png`,
+            maskableIconUrl: `${env.WEBSITE_URL}/icons/icon-512x512.png`,
+            splashScreenFadeOutDuration: 300,
+            enableNotifications: true,
+            minSdkVersion: 21,
+            targetSdkVersion: Number(env.ANDROID_API_LEVEL),
+            appVersionName: version,          // 문자열
+            appVersionCode,                   // 정수 (리딩 제로 없음)
+            webManifestUrl: `${env.WEBSITE_URL}/manifest.webmanifest`,
+            signingKey: {
+              path: "./android.keystore",
+              alias: "android"
             }
-          }
-          JSON
-
-          echo "✅ twa-manifest.json 생성"
+          };
+          
+          fs.writeFileSync('twa-manifest.json', JSON.stringify(manifest, null, 2));
+          NODE
+          
+          # JSON 형식 검증 (있으면 더 안심)
+          jq . twa-manifest.json > /dev/null
+          
+          echo "✅ twa-manifest.json 생성 & 검증 완료"
           cat twa-manifest.json
 
-      - name: 🧱 Generate Android Project from manifest (non-interactive)  # FIX
+      - name: 🧱 Generate Android Project from manifest (non-interactive)
         run: |
           cd android-build
           bubblewrap update --manifest ./twa-manifest.json
