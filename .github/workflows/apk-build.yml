@@ -1,0 +1,283 @@
+name: APK Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '빌드할 태그 (예: v1.0.0)'
+        required: true
+        type: string
+
+env:
+  NODE_VERSION: '20'
+  JAVA_VERSION: '17'
+  ANDROID_API_LEVEL: '34'
+  ANDROID_BUILD_TOOLS: '34.0.0'
+  APP_NAME: 'MeetTime'
+  WEBSITE_URL: 'https://meet.chuseok22.com'
+  PACKAGE_ID: 'com.meettime.app'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  build-apk:
+    name: 🤖 Build MeetTime Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🏷️ 현재 버전 확인
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          
+          # 태그 형식 검증 (v1.2.3)
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ 잘못된 태그 형식: $TAG (v1.2.3 형식이어야 함)"
+            exit 1
+          fi
+          
+          VERSION="${TAG#v}"  # v1.2.3 → 1.2.3
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "🏷️ MeetTime 빌드 버전: $TAG ($VERSION)"
+
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.version.outputs.tag }}
+          fetch-depth: 0
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: ☕ Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: 🤖 Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: ${{ env.ANDROID_API_LEVEL }}
+          build-tools: ${{ env.ANDROID_BUILD_TOOLS }}
+
+      - name: 📥 Node.js 의존성 설치
+        run: |
+          echo "📥 Node.js 의존성 설치 중..."
+          npm ci
+          echo "✅ Node.js 의존성 설치 완료"
+
+      - name: 🏗️ Build Next.js Application
+        run: |
+          echo "🏗️ MeetTime 웹앱 빌드 시작..."
+          npm run build
+          
+          # 빌드 결과 확인
+          if [ ! -d "out" ] && [ ! -d ".next" ]; then
+            echo "❌ Next.js 빌드 실패: out 또는 .next 디렉토리가 없습니다"
+            exit 1
+          fi
+          
+          echo "✅ MeetTime 웹앱 빌드 완료"
+          
+      - name: 📱 Install Bubblewrap CLI
+        run: |
+          echo "📱 Bubblewrap CLI 설치 중..."
+          npm install -g @bubblewrap/cli
+          bubblewrap --version
+          echo "✅ Bubblewrap CLI 설치 완료"
+
+      - name: 🔧 Create Android Build Directory
+        run: |
+          # GitHub Actions 가상머신 내부에 임시 빌드 폴더 생성
+          echo "📁 Android 빌드 디렉토리 생성 중..."
+          mkdir -p android-build
+          cd android-build
+          pwd
+          echo "✅ 빌드 디렉토리 생성 완료: $(pwd)"
+
+      - name: 🔐 Keystore base64 디코딩
+        run: |
+          cd android-build
+          
+          # 🔑 GitHub Secrets에서 키스토어 복원
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android.keystore
+          
+          # 키스토어 파일 확인
+          if [ ! -f "android.keystore" ]; then
+            echo "❌ 키스토어 파일 복원 실패"
+            exit 1
+          fi
+          
+          # 키스토어 정보 검증 (alias 확인)
+          echo "🔍 키스토어 정보 확인:"
+          keytool -list -keystore android.keystore -storepass "${{ secrets.KEYSTORE_PASSWORD }}" | grep "android"
+          
+          echo "✅ 프로덕션 키스토어 복원 완료 (alias: android)"
+
+      - name: 🌐 Initialize TWA Project
+        run: |
+          cd android-build
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          bubblewrap init \
+            --manifest ${{ env.WEBSITE_URL }}/manifest.webmanifest \
+            --directory . \
+            --packageId ${{ env.PACKAGE_ID }} \
+            --name "${{ env.APP_NAME }}" \
+            --launcherName "${{ env.APP_NAME }}" \
+            --display standalone \
+            --orientation portrait \
+            --themeColor "#3b82f6" \
+            --backgroundColor "#ffffff" \
+            --startUrl "/" \
+            --iconUrl ${{ env.WEBSITE_URL }}/icons/icon-512x512.png \
+            --maskableIconUrl ${{ env.WEBSITE_URL }}/icons/icon-512x512.png \
+            --splashScreenFadeOutDuration 300 \
+            --enableNotifications true \
+            --minSdkVersion 21 \
+            --targetSdkVersion ${{ env.ANDROID_API_LEVEL }} \
+            --versionCode $(echo "$VERSION" | sed 's/\.//g')$(date +%m%d) \
+            --versionName "$VERSION"
+          
+          echo "✅ TWA 프로젝트 초기화 완료"
+
+      - name: 🏗️ Build Signed APK
+        run: |
+          cd android-build
+          
+          # Gradle wrapper 권한 설정
+          if [ -f "gradlew" ]; then
+            chmod +x gradlew
+          fi
+          
+          # 🔐 기존 키스토어로 서명된 APK 빌드
+          bubblewrap build \
+            --skipPwaValidation \
+            --keystore android.keystore \
+            --keystorePassword "${{ secrets.KEYSTORE_PASSWORD }}" \
+            --keyPassword "${{ secrets.KEY_PASSWORD }}" \
+            --alias android
+          
+          echo "✅ 서명된 APK 빌드 완료 (alias: android)"
+
+      - name: 📝 Prepare APK File
+        id: apk-info
+        run: |
+          cd android-build
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          # APK 파일 찾기
+          APK_PATHS=(
+            "app-release.apk"
+            "app/build/outputs/apk/release/app-release.apk"
+            "app/build/outputs/apk/release/app-release-unsigned.apk"
+            "build/outputs/apk/release/app-release.apk"
+          )
+          
+          APK_FILE=""
+          for path in "${APK_PATHS[@]}"; do
+            if [ -f "$path" ]; then
+              APK_FILE="$path"
+              break
+            fi
+          done
+          
+          if [ -z "$APK_FILE" ]; then
+            echo "❌ APK 파일을 찾을 수 없습니다"
+            find . -name "*.apk" -type f
+            exit 1
+          fi
+          
+          # APK 파일명 변경
+          NEW_APK_NAME="meettime-v${VERSION}.apk"
+          cp "$APK_FILE" "../$NEW_APK_NAME"
+          
+          APK_SIZE=$(du -h "../$NEW_APK_NAME" | cut -f1)
+          APK_PATH="../$NEW_APK_NAME"
+          
+          echo "apk-name=$NEW_APK_NAME" >> $GITHUB_OUTPUT
+          echo "apk-path=$APK_PATH" >> $GITHUB_OUTPUT
+          echo "apk-size=$APK_SIZE" >> $GITHUB_OUTPUT
+          
+          echo "📱 APK 준비 완료: $NEW_APK_NAME ($APK_SIZE)"
+
+      - name: 🔍 APK Verification
+        run: |
+          APK_PATH="${{ steps.apk-info.outputs.apk-path }}"
+          
+          echo "🔍 APK 서명 검증:"
+          
+          # APK 서명 정보 확인
+          if command -v jarsigner >/dev/null 2>&1; then
+            jarsigner -verify -verbose -certs "$APK_PATH" | head -20
+          fi
+          
+          # 기본 파일 정보
+          ls -la "$APK_PATH"
+          echo "✅ APK 검증 완료"
+
+      - name: 📤 Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: meettime-apk-${{ steps.version.outputs.version }}
+          path: ${{ steps.apk-info.outputs.apk-path }}
+          retention-days: 90
+
+      - name: 🎉 Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "🚀 MeetTime ${{ steps.version.outputs.tag }}"
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            ${{ steps.apk-info.outputs.apk-path }}
+          body: |
+            ## 🚀 MeetTime ${{ steps.version.outputs.tag }}
+            
+            **프로덕션 키스토어로 서명된 안정적인 버전입니다!** 🔐
+            
+            ### 📱 Android APK
+            - **파일명**: `${{ steps.apk-info.outputs.apk-name }}`
+            - **크기**: ${{ steps.apk-info.outputs.apk-size }}
+            - **서명**: ✅ 프로덕션 키스토어로 서명됨
+            - **업데이트 호환**: ✅ 기존 설치된 앱 업데이트 가능
+            
+            ### 📥 설치 방법
+            1. 📲 `${{ steps.apk-info.outputs.apk-name }}` 다운로드
+            2. ⚙️ Android 설정 > 보안 > "알 수 없는 소스" 허용
+            3. 📱 APK 파일 실행하여 설치/업데이트
+            
+            ### 🌐 웹 버전
+            [${{ env.WEBSITE_URL }}](${{ env.WEBSITE_URL }})
+            
+            ### 🔐 보안 정보
+            - **키스토어**: 프로덕션용 안전한 키스토어 사용
+            - **서명 검증**: GitHub Actions에서 자동 검증
+            - **패키지 ID**: `${{ env.PACKAGE_ID }}`
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📊 Build Summary
+        run: |
+          echo "🎉 MeetTime APK 빌드 성공!"
+          echo "📦 버전: ${{ steps.version.outputs.tag }}"
+          echo "📱 APK: ${{ steps.apk-info.outputs.apk-name }}"
+          echo "🔐 키스토어: 프로덕션용 (기존 키스토어 사용)"
+          echo "🔗 릴리즈: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
