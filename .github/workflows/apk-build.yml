@@ -31,7 +31,7 @@ jobs:
   check-version-update:
     name: 🔍 Check Version Update
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
 
     outputs:
       should-build: ${{ steps.check-update.outputs.should-build }}
@@ -64,32 +64,16 @@ jobs:
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "✅ 수동 실행: $TAG"
           else
-            # Version Management 워크플로 완료 후
-            BRANCH="${{ github.event.workflow_run.head_branch }}"
-            git fetch --tags --force
-
-            if [ -n "$BRANCH" ]; then
-              git fetch origin "$BRANCH":"refs/remotes/origin/$BRANCH"
-              git checkout -qf "origin/$BRANCH"
-            fi
-
-            # FIX: 릴리스 커밋 메시지에서 vX.Y.Z 파싱 (가장 최근 50개 중 첫 매칭)
-            REL_TAG="$(git log -n 50 --pretty=format:%s | grep -Eo '^chore\(release\): v[0-9]+\.[0-9]+\.[0-9]+' | head -n1 | sed -E 's/^chore\(release\): (v[0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
-
-            # 보완: HEAD를 가리키는 vX.Y.Z 태그가 있으면 사용
-            if [ -z "$REL_TAG" ]; then
-              REL_TAG="$(git tag --points-at HEAD | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1 || true)"
-            fi
-
-            if [ -n "$REL_TAG" ]; then
-              VERSION="${REL_TAG#v}"
+            TAG="${GITHUB_REF#refs/tags/}"
+            if [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              VERSION="${TAG#v}"
               echo "should-build=true" >> $GITHUB_OUTPUT
-              echo "tag=$REL_TAG" >> $GITHUB_OUTPUT
+              echo "tag=$TAG" >> $GITHUB_OUTPUT
               echo "version=$VERSION" >> $GITHUB_OUTPUT
-              echo "✅ 새 버전 태그 감지: $REL_TAG"
+              echo "✅ 새 버전 태그 감지: $TAG"
             else
               echo "should-build=false" >> $GITHUB_OUTPUT
-              echo "📝 새 버전 태그가 없음 - APK 빌드 건너뜀"
+              echo "📝 유효한 새 버전 태그가 아님 - APK 빌드 건너뜀"
             fi
           fi
 
@@ -263,9 +247,15 @@ jobs:
           cat twa-manifest.json
 
       - name: 🧱 Generate Android Project from manifest (non-interactive)
+        env:
+          VERSION: ${{ needs.check-version-update.outputs.version }}
         run: |
           cd android-build
-          bubblewrap update --manifest ./twa-manifest.json
+          bubblewrap update \
+            --manifest ./twa-manifest.json \
+            --appVersionName "$VERSION" \
+            --skipPwaValidation
+          echo "✅ bubblewrap update 완료 (비대화형)"
 
       - name: 🏗️ Build Signed APK
         run: |
