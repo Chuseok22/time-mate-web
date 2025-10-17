@@ -1,0 +1,217 @@
+name: Version Management
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency: # 중복 실행 방지
+  group: version-management-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  version-check:
+    name: 버전 업데이트 (자동)
+    runs-on: ubuntu-latest
+
+    # release 커밋 ([skip ci])로 재실행되는 러너는 탈출
+    if: ${{ github.event_name != 'push' || (github.event.head_commit != null && !contains(github.event.head_commit.message, '[skip ci]')) }}
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: 커밋 메시지 확인
+        id: check-commit
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          COMMIT_MSG="$(git log -1 --format=%s)"
+          echo "commit-message=$COMMIT_MSG" >> $GITHUB_OUTPUT
+          
+          # 버전 타입 확인
+          if [[ "$COMMIT_MSG" =~ ^version\(major\): ]]; then
+            echo "version-type=major" >> $GITHUB_OUTPUT
+            echo "should-update=true" >> $GITHUB_OUTPUT
+            echo "🚀 Major 버전 업데이트 감지"
+          elif [[ "$COMMIT_MSG" =~ ^version\(minor\): ]]; then
+            echo "version-type=minor" >> $GITHUB_OUTPUT
+            echo "should-update=true" >> $GITHUB_OUTPUT
+            echo "✨ Minor 버전 업데이트 감지"
+          elif [[ "$COMMIT_MSG" =~ ^version\(patch\): ]]; then
+            echo "version-type=patch" >> $GITHUB_OUTPUT
+            echo "should-update=true" >> $GITHUB_OUTPUT
+            echo "🐛 Patch 버전 업데이트 감지"
+          else
+            echo "should-update=false" >> $GITHUB_OUTPUT
+            echo "📝 일반 커밋 - 버전 업데이트 없음"
+          fi
+
+      - name: 현재 버전
+        if: steps.check-commit.outputs.should-update == 'true'
+        id: current-version
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "📦 현재 버전: $CURRENT_VERSION"
+
+      - name: 🔢 새로운 버전 계산
+        if: steps.check-commit.outputs.should-update == 'true'
+        id: new-version
+        run: |
+          CURRENT="${{ steps.current-version.outputs.current }}"
+          VERSION_TYPE="${{ steps.check-commit.outputs.version-type }}"
+          
+          # 버전 분리 (1.2.3 -> major=1, minor=2, patch=3)
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+          
+          # 새 버전 계산
+          case $VERSION_TYPE in
+            "major")
+              NEW_MAJOR=$((MAJOR + 1))
+              NEW_MINOR=0
+              NEW_PATCH=0
+              ;;
+            "minor")
+              NEW_MAJOR=$MAJOR
+              NEW_MINOR=$((MINOR + 1))
+              NEW_PATCH=0
+              ;;
+            "patch")
+              NEW_MAJOR=$MAJOR
+              NEW_MINOR=$MINOR
+              NEW_PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="${NEW_MAJOR}.${NEW_MINOR}.${NEW_PATCH}"
+          echo "new=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "🎯 새 버전: $NEW_VERSION"
+
+      - name: 📝 Update package.json
+        if: steps.check-commit.outputs.should-update == 'true'
+        run: |
+          NEW_VERSION="${{ steps.new-version.outputs.new }}"
+          
+          # package.json 버전 업데이트
+          npm version $NEW_VERSION --no-git-tag-version
+          
+          echo "✅ package.json 버전 업데이트 완료: $NEW_VERSION"
+
+      - name: 📋 Generate Changelog Entry
+        if: steps.check-commit.outputs.should-update == 'true'
+        env:
+          TZ: Asia/Seoul
+        run: |
+          NEW_VERSION="${{ steps.new-version.outputs.new }}"
+          COMMIT_MSG="${{ steps.check-commit.outputs.commit-message }}"
+          VERSION_TYPE="${{ steps.check-commit.outputs.version-type }}"
+          DATE=$(date '+%Y-%m-%d')
+          
+          # 커밋 메시지에서 설명 부분 추출
+          DESCRIPTION=$(echo "$COMMIT_MSG" | sed 's/^version([^)]*): //')
+          
+          # 버전 타입 이모지
+          case $VERSION_TYPE in
+            "major") EMOJI="🚀" ;;
+            "minor") EMOJI="✨" ;;
+            "patch") EMOJI="🐛" ;;
+          esac
+          
+          # CHANGELOG.md 업데이트
+          if [ ! -f CHANGELOG.md ]; then
+            echo "# Changelog" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+          fi
+          
+          # 임시 파일 생성
+          {
+            echo "# Changelog"
+            echo ""
+            echo "## [$NEW_VERSION] - $DATE"
+            echo ""
+            echo "$EMOJI **$VERSION_TYPE**: $DESCRIPTION"
+            echo ""
+            tail -n +3 CHANGELOG.md 2>/dev/null || true
+          } > CHANGELOG.tmp
+          
+          mv CHANGELOG.tmp CHANGELOG.md
+          
+          echo "📋 CHANGELOG.md 업데이트 완료"
+
+      - name: 🏷️ Git Tag 생성
+        if: steps.check-commit.outputs.should-update == 'true'
+        id: git-tag
+        run: |
+          NEW_VERSION="${{ steps.new-version.outputs.new }}"
+          COMMIT_MSG="${{ steps.check-commit.outputs.commit-message }}"
+          
+          # Git 설정
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name  "github-actions[bot]"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE" || true
+          
+          # 변경사항 커밋
+          git add package.json package-lock.json CHANGELOG.md
+          git commit -m "chore(release): v$NEW_VERSION [skip ci] $COMMIT_MSG"
+  
+          # 태그 생성
+          TAG="v$NEW_VERSION"
+          
+          if git tag -l "$TAG" | grep -Fxq "$TAG"; then
+            echo "tag-existed=true" >> $GITHUB_OUTPUT
+            echo "⚠️ 태그 $TAG 이미 존재. 생성 생략."
+          else
+            git tag -a "v$NEW_VERSION" -m "Release v$NEW_VERSION $COMMIT_MSG"
+            echo "tag-existed=false" >> $GITHUB_OUTPUT
+          fi
+
+          echo "🏷️ Git 태그 생성 완료: v$NEW_VERSION"
+
+      - name: 📤 Push Changes
+        if: steps.check-commit.outputs.should-update == 'true'
+        run: |
+          NEW_VERSION="${{ steps.new-version.outputs.new }}"
+          TAG_EXISTED="${{ steps.git-tag.outputs.tag-existed }}"
+          
+          # 변경사항과 태그 푸시
+          git push origin main
+          if [ "$TAG_EXISTED" != "true" ]; then
+            git push origin "v$NEW_VERSION"
+          fi
+          
+          echo "📤 변경사항 푸시 완료"
+
+      - name: 📊 Summary
+        if: steps.check-commit.outputs.should-update == 'true'
+        run: |
+          echo "🎉 버전 업데이트 완료!"
+          echo "📦 이전 버전: ${{ steps.current-version.outputs.current }}"
+          echo "🎯 새 버전: ${{ steps.new-version.outputs.new }}"
+          echo "🏷️ 태그: v${{ steps.new-version.outputs.new }}"
+          echo "📋 CHANGELOG.md 업데이트됨"
+
+      - name: 📝 No Version Update
+        if: steps.check-commit.outputs.should-update == 'false'
+        run: |
+          echo "📝 버전 업데이트가 필요하지 않은 커밋입니다."
+          echo "💡 버전 업데이트를 원한다면 다음 형식으로 커밋하세요:"
+          echo "   - version(major): 주요 변경사항"
+          echo "   - version(minor): 새로운 기능 추가"
+          echo "   - version(patch): 버그 수정"
