@@ -155,22 +155,14 @@ jobs:
       - name: 📱 Install Bubblewrap CLI
         run: |
           echo "📱 Bubblewrap CLI 설치 중..."
-          
-          # 🎯 printf로 여러 번 "n" 응답 준비
-          printf "n\nn\nn\nn\nn\n" | npm install -g @bubblewrap/cli --silent
-          
-          # 🔧 설정 파일 직접 생성 (더 안전)
-          mkdir -p ~/.bubblewrap
-          cat > ~/.bubblewrap/config.json << EOF
-          {
-            "jdkPath": "$JAVA_HOME",
-            "androidSdkPath": "${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
-          }
-          EOF
-  
-          # 🔎 설치 및 설정 확인
+          npm install -g @bubblewrap/cli
+          # 비대화형 설정 주입
+          bubblewrap updateConfig \
+            --jdkPath "${JAVA_HOME}" \
+            --androidSdkPath "${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
           bubblewrap --version
-          echo "✅ Bubblewrap CLI 설치 완료"
+          bubblewrap doctor || true
+          echo "✅ Bubblewrap CLI 설치/설정 완료"
           
           # 🔍 설정 확인
           echo "🔍 Bubblewrap 설정:"
@@ -204,21 +196,17 @@ jobs:
           
           echo "✅ 프로덕션 키스토어 복원 완료 (alias: android)"
 
-      - name: 🌐 Initialize TWA Project
+      - name: 📝 Generate twa-manifest.json (CI-safe)   # FIX
         run: |
           cd android-build
           VERSION="${{ needs.check-version-update.outputs.version }}"
-          
-          echo "🌐 MeetTime TWA 프로젝트 초기화 중..."
-          
-          # 🎯 twa-manifest.json 파일을 미리 생성
-          cat > twa-manifest.json << EOF
+          HOST=$(node -e "console.log(new URL(process.env.WEBSITE_URL).host)")
+          APP_VERSION_CODE="$(echo "$VERSION" | tr -d '.')$(date +%m%d)"
+
+          cat > twa-manifest.json <<JSON
           {
             "packageId": "${{ env.PACKAGE_ID }}",
-            "host": {
-              "scheme": "https",
-              "url": "meet.chuseok22.com"
-            },
+            "host": "${HOST}",
             "name": "${{ env.APP_NAME }}",
             "launcherName": "${{ env.APP_NAME }}",
             "display": "standalone",
@@ -228,37 +216,27 @@ jobs:
             "startUrl": "/",
             "iconUrl": "${{ env.WEBSITE_URL }}/icons/icon-512x512.png",
             "maskableIconUrl": "${{ env.WEBSITE_URL }}/icons/icon-512x512.png",
-            "monochromeIconUrl": "${{ env.WEBSITE_URL }}/icons/icon-512x512.png",
             "splashScreenFadeOutDuration": 300,
             "enableNotifications": true,
-            "isChromeOSOnly": false,
-            "fullscreen": false,
             "minSdkVersion": 21,
             "targetSdkVersion": ${{ env.ANDROID_API_LEVEL }},
-            "versionCode": $(echo "$VERSION" | sed 's/\.//g')$(date +%m%d),
-            "versionName": "$VERSION",
-            "shortcuts": [],
-            "generatorApp": "bubblewrap-cli",
+            "appVersionName": "${VERSION}",
+            "appVersionCode": ${APP_VERSION_CODE},
             "webManifestUrl": "${{ env.WEBSITE_URL }}/manifest.webmanifest",
-            "fallbackType": "customtabs",
-            "features": {
-              "locationDelegation": {
-                "enabled": false
-              },
-              "playBilling": {
-                "enabled": false
-              }
-            },
-            "alphaDependencies": {
-              "enabled": false
-            },
-            "enableSiteSettingsShortcut": true,
-            "isChromeOSOnly": false
+            "signingKey": {
+              "path": "./android.keystore",
+              "alias": "android"
+            }
           }
-          EOF
-          
-          # 🎯 설정 파일을 사용하여 비대화형 초기화
-          bubblewrap init --manifest "${{ env.WEBSITE_URL }}/manifest.webmanifest" --directory . --skipPwaValidation
+          JSON
+
+          echo "✅ twa-manifest.json 생성"
+          cat twa-manifest.json
+
+      - name: 🧱 Generate Android Project from manifest (non-interactive)  # FIX
+        run: |
+          cd android-build
+          bubblewrap update --manifest ./twa-manifest.json
 
       - name: 🏗️ Build Signed APK
         run: |
