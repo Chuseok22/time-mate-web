@@ -29,85 +29,89 @@ permissions:
 
 jobs:
   # 1) 어떤 태그를 빌드할지 결정
-  resolve-tag:
-    name: 🔎 Resolve Tag
+  # 🎯 핵심: 버전이 실제로 업데이트되었는지 확인
+  check-version-update:
+    name: 🔍 Check Version Update
     runs-on: ubuntu-latest
-    # Version Management 성공(run) 또는 수동 실행(dispatch)만 허용
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     outputs:
-      tag: ${{ steps.get-tag.outputs.tag }}
-      version: ${{ steps.get-tag.outputs.version }}
+      should-build: ${{ steps.check-update.outputs.should-build }}
+      tag: ${{ steps.check-update.outputs.tag }}
+      version: ${{ steps.check-update.outputs.version }}
 
     steps:
-      - name: Checkout
+      - name: 🛎️ Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Resolve tag from event
-        id: get-tag
+
+      - name: 🔍 Check if version was actually updated
+        id: check-update
         run: |
-          set -euo pipefail
+          set -Eeuo pipefail
 
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # 수동 실행인 경우
             TAG="${{ github.event.inputs.tag }}"
+            # FIX: 태그 형식 검증
+            if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "❌ 잘못된 태그 형식: $TAG (v1.2.3 형식이어야 함)"
+              exit 1
+            fi
+            VERSION="${TAG#v}"
+            echo "should-build=true" >> $GITHUB_OUTPUT
+            echo "tag=$TAG" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "✅ 수동 실행: $TAG"
           else
-            # Version Management가 만든 릴리스 커밋의 SHA
-            SHA="${{ github.event.workflow_run.head_sha }}"
+            # Version Management 워크플로 완료 후
+            BRANCH="${{ github.event.workflow_run.head_branch }}"
             git fetch --tags --force
 
-            # 해당 SHA를 가리키는 vX.Y.Z 태그 추출(여러 개면 가장 큰 버전 선택)
-            TAG="$(git tag --points-at "$SHA" | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1 || true)"
-            if [ -z "$TAG" ]; then
-              echo "❌ 태그를 찾을 수 없습니다. SHA=$SHA 에 vX.Y.Z 태그가 없습니다."
-              exit 1
+            if [ -n "$BRANCH" ]; then
+              git fetch origin "$BRANCH":"refs/remotes/origin/$BRANCH"
+              git checkout -qf "origin/$BRANCH"
+            fi
+
+            # FIX: 릴리스 커밋 메시지에서 vX.Y.Z 파싱 (가장 최근 50개 중 첫 매칭)
+            REL_TAG="$(git log -n 50 --pretty=format:%s | grep -Eo '^chore\(release\): v[0-9]+\.[0-9]+\.[0-9]+' | head -n1 | sed -E 's/^chore\(release\): (v[0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
+
+            # 보완: HEAD를 가리키는 vX.Y.Z 태그가 있으면 사용
+            if [ -z "$REL_TAG" ]; then
+              REL_TAG="$(git tag --points-at HEAD | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1 || true)"
+            fi
+
+            if [ -n "$REL_TAG" ]; then
+              VERSION="${REL_TAG#v}"
+              echo "should-build=true" >> $GITHUB_OUTPUT
+              echo "tag=$REL_TAG" >> $GITHUB_OUTPUT
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
+              echo "✅ 새 버전 태그 감지: $REL_TAG"
+            else
+              echo "should-build=false" >> $GITHUB_OUTPUT
+              echo "📝 새 버전 태그가 없음 - APK 빌드 건너뜀"
             fi
           fi
 
-          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "❌ 잘못된 태그 형식: $TAG (v1.2.3 형식이어야 함)"
-            exit 1
-          fi
-
-          VERSION="${TAG#v}"
-
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "✅ Resolved: TAG=$TAG, VERSION=$VERSION"
-
-  # 2) 실제 apk 빌드 & 릴리스
+  # 🚀 실제 APK 빌드 (새 버전이 있을 때만)
   build-apk:
     name: 🤖 Build MeetTime Android APK
     runs-on: ubuntu-latest
-    needs:
-      - resolve-tag
+    needs: check-version-update
+    if: needs.check-version-update.outputs.should-build == 'true'
 
     steps:
-      - name: 🏷️ 현재 버전 확인
-        id: version
+      - name: 🏷️ 버전 정보
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="${{ github.event.inputs.tag }}"
-          else
-            TAG="${GITHUB_REF#refs/tags/}"
-          fi
-          
-          # 태그 형식 검증 (v1.2.3)
-          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "❌ 잘못된 태그 형식: $TAG (v1.2.3 형식이어야 함)"
-            exit 1
-          fi
-          
-          VERSION="${TAG#v}"  # v1.2.3 → 1.2.3
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "🏷️ MeetTime 빌드 버전: $TAG ($VERSION)"
+          echo "🏷️ 빌드할 버전: ${{ needs.check-version-update.outputs.tag }}"
+          echo "📦 버전 번호: ${{ needs.check-version-update.outputs.version }}"
 
       - name: 코드 체크아웃
         uses: actions/checkout@v4
         with:
-          ref: ${{ steps.version.outputs.tag }}
+          ref: ${{ needs.check-version-update.outputs.tag }}
           fetch-depth: 0
 
       - name: 📦 Setup Node.js
@@ -287,22 +291,22 @@ jobs:
       - name: 📤 Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: meettime-apk-${{ steps.version.outputs.version }}
+          name: meettime-apk-${{ needs.check-version-update.outputs.version }}
           path: ${{ steps.apk-info.outputs.apk-path }}
           retention-days: 90
 
       - name: 🎉 Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: "🚀 MeetTime ${{ steps.version.outputs.tag }}"
+          tag_name: ${{ needs.check-version-update.outputs.tag }}
+          name: "🚀 MeetTime ${{ needs.check-version-update.outputs.tag }}"
           draft: false
           prerelease: false
           generate_release_notes: true
           files: |
             ${{ steps.apk-info.outputs.apk-path }}
           body: |
-            ## 🚀 MeetTime ${{ steps.version.outputs.tag }}
+            ## 🚀 MeetTime ${{ needs.check-version-update.outputs.tag }}
             
             **프로덕션 키스토어로 서명된 안정적인 버전입니다!** 🔐
             
@@ -311,11 +315,6 @@ jobs:
             - **크기**: ${{ steps.apk-info.outputs.apk-size }}
             - **서명**: ✅ 프로덕션 키스토어로 서명됨
             - **업데이트 호환**: ✅ 기존 설치된 앱 업데이트 가능
-            
-            ### 📥 설치 방법
-            1. 📲 `${{ steps.apk-info.outputs.apk-name }}` 다운로드
-            2. ⚙️ Android 설정 > 보안 > "알 수 없는 소스" 허용
-            3. 📱 APK 파일 실행하여 설치/업데이트
             
             ### 🌐 웹 버전
             [${{ env.WEBSITE_URL }}](${{ env.WEBSITE_URL }})
@@ -330,7 +329,6 @@ jobs:
       - name: 📊 Build Summary
         run: |
           echo "🎉 MeetTime APK 빌드 성공!"
-          echo "📦 버전: ${{ steps.version.outputs.tag }}"
+          echo "📦 버전: ${{ needs.check-version-update.outputs.tag }}"
           echo "📱 APK: ${{ steps.apk-info.outputs.apk-name }}"
-          echo "🔐 키스토어: 프로덕션용 (기존 키스토어 사용)"
-          echo "🔗 릴리즈: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
+          echo "🔗 릴리즈: https://github.com/${{ github.repository }}/releases/tag/${{ needs.check-version-update.outputs.tag }}"

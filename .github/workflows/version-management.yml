@@ -20,21 +20,17 @@ jobs:
     # release 커밋 ([skip ci])로 재실행되는 러너는 탈출
     if: ${{ github.event_name != 'push' || (github.event.head_commit != null && !contains(github.event.head_commit.message, '[skip ci]')) }}
 
+    outputs:
+      version-updated: ${{ steps.check-commit.outputs.should-update }}
+      new-version: ${{ steps.new-version.outputs.new }}
+      new-tag: ${{ steps.new-version.outputs.tag }}
+
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: 의존성 설치
-        run: npm ci
 
       - name: 커밋 메시지 확인
         id: check-commit
@@ -44,7 +40,7 @@ jobs:
         run: |
           COMMIT_MSG="$(git log -1 --format=%s)"
           echo "commit-message=$COMMIT_MSG" >> $GITHUB_OUTPUT
-          
+
           # 버전 타입 확인
           if [[ "$COMMIT_MSG" =~ ^version\(major\): ]]; then
             echo "version-type=major" >> $GITHUB_OUTPUT
@@ -62,6 +58,27 @@ jobs:
             echo "should-update=false" >> $GITHUB_OUTPUT
             echo "📝 일반 커밋 - 버전 업데이트 없음"
           fi
+
+      # 🚫 일반 커밋이면 여기서 워크플로 종료 (성공으로)
+      - name: 📝 일반 커밋 처리 (성공 종료)
+        if: steps.check-commit.outputs.should-update == 'false'
+        run: |
+          echo "📝 일반 커밋이므로 버전 관리를 건너뜁니다."
+          echo "💡 버전 업데이트를 원한다면 다음 형식으로 커밋하세요:"
+          echo "   - version(major): 주요 변경사항"
+          echo "   - version(minor): 새로운 기능 추가"
+          echo "   - version(patch): 버그 수정"
+          echo ""
+          echo "✅ 워크플로 성공 완료 (APK 빌드는 실행되지 않음)"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 의존성 설치
+        run: npm ci
 
       - name: 현재 버전
         if: steps.check-commit.outputs.should-update == 'true'
@@ -101,7 +118,10 @@ jobs:
           esac
           
           NEW_VERSION="${NEW_MAJOR}.${NEW_MINOR}.${NEW_PATCH}"
+          NEW_TAG="v${NEW_VERSION}"
+          
           echo "new=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$NEW_TAG" >> $GITHUB_OUTPUT
           echo "🎯 새 버전: $NEW_VERSION"
 
       - name: 📝 Update package.json
