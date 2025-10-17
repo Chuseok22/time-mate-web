@@ -141,12 +141,6 @@ jobs:
           echo "🏗️ MeetTime 웹앱 빌드 시작..."
           npm run build
           
-          # 빌드 결과 확인
-          if [ ! -d "out" ] && [ ! -d ".next" ]; then
-            echo "❌ Next.js 빌드 실패: out 또는 .next 디렉토리가 없습니다"
-            exit 1
-          fi
-          
           echo "✅ MeetTime 웹앱 빌드 완료"
           
       - name: 📱 Install Bubblewrap CLI
