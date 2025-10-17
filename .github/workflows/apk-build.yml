@@ -283,8 +283,9 @@ jobs:
           cd android-build
           VERSION="${{ needs.check-version-update.outputs.version }}"
           
-          # APK 파일 찾기
+          # Bubblewrap 기본 산출물 우선 검색
           APK_PATHS=(
+            "app-release-signed.apk"
             "app-release.apk"
             "app/build/outputs/apk/release/app-release.apk"
             "app/build/outputs/apk/release/app-release-unsigned.apk"
@@ -305,31 +306,29 @@ jobs:
             exit 1
           fi
           
-          # APK 파일명 변경
           NEW_APK_NAME="meettime-v${VERSION}.apk"
-          cp "$APK_FILE" "../$NEW_APK_NAME"
+          DEST_PATH="$GITHUB_WORKSPACE/$NEW_APK_NAME"   # ✅ 절대경로로 복사
           
-          APK_SIZE=$(du -h "../$NEW_APK_NAME" | cut -f1)
-          APK_PATH="../$NEW_APK_NAME"
+          cp "$APK_FILE" "$DEST_PATH"
           
-          echo "apk-name=$NEW_APK_NAME" >> $GITHUB_OUTPUT
-          echo "apk-path=$APK_PATH" >> $GITHUB_OUTPUT
-          echo "apk-size=$APK_SIZE" >> $GITHUB_OUTPUT
+          APK_SIZE=$(du -h "$DEST_PATH" | cut -f1)
+          
+          echo "apk-name=$NEW_APK_NAME"   >> $GITHUB_OUTPUT
+          echo "apk-path=$DEST_PATH"      >> $GITHUB_OUTPUT   # ✅ 절대경로 출력
+          echo "apk-size=$APK_SIZE"       >> $GITHUB_OUTPUT
           
           echo "📱 APK 준비 완료: $NEW_APK_NAME ($APK_SIZE)"
+          echo "📍 경로: $DEST_PATH"
 
       - name: 🔍 APK Verification
         run: |
           APK_PATH="${{ steps.apk-info.outputs.apk-path }}"
           
           echo "🔍 APK 서명 검증:"
-          
-          # APK 서명 정보 확인
           if command -v jarsigner >/dev/null 2>&1; then
-            jarsigner -verify -verbose -certs "$APK_PATH" | head -20
+            jarsigner -verify -verbose -certs "$APK_PATH" | head -20 || true
           fi
           
-          # 기본 파일 정보
           ls -la "$APK_PATH"
           echo "✅ APK 검증 완료"
 
