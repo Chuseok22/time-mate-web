@@ -112,6 +112,15 @@ jobs:
           ref: ${{ needs.check-version-update.outputs.tag }}
           fetch-depth: 0
 
+      # 브랜치별 .env.production 생성
+      - name: Create .env.production file
+        run: |
+          if [ "${{ github.ref_name }}" == "main" ]; then
+            echo -e "${{ secrets.ENV_PRODUCTION }}" > .env.production
+          elif [ "${{ github.ref_name }}" == "test" ]; then
+            echo -e "${{ secrets.ENV_PRODUCTION }}" > .env.production
+          fi
+
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
