@@ -156,22 +156,25 @@ jobs:
         run: |
           echo "📱 Bubblewrap CLI 설치 중..."
           
-          # 🎯 stdin을 /dev/null로 리다이렉트하여 대화형 프롬프트 방지
-          npm install -g @bubblewrap/cli < /dev/null
+          # 🎯 printf로 여러 번 "n" 응답 준비
+          printf "n\nn\nn\nn\nn\n" | npm install -g @bubblewrap/cli --silent
           
-          # 🔧 설정 확인 및 업데이트
-          bubblewrap updateConfig \
-            --jdkPath="$JAVA_HOME" \
-            --androidSdkPath="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
-          
-          echo "✅ Bubblewrap CLI 설치 완료"
-
-      - name: 🔎 Bubblewrap 버전확인
-        run: |
-          echo "🔎 Bubblewrap 설정 확인 중..."
+          # 🔧 설정 파일 직접 생성 (더 안전)
+          mkdir -p ~/.bubblewrap
+          cat > ~/.bubblewrap/config.json << EOF
+          {
+            "jdkPath": "$JAVA_HOME",
+            "androidSdkPath": "${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          }
+          EOF
+  
+          # 🔎 설치 및 설정 확인
           bubblewrap --version
-          bubblewrap doctor
-          echo "✅ Bubblewrap 설정 확인 완료"
+          echo "✅ Bubblewrap CLI 설치 완료"
+          
+          # 🔍 설정 확인
+          echo "🔍 Bubblewrap 설정:"
+          cat ~/.bubblewrap/config.json || echo "설정 파일 없음"
 
       - name: 🔧 Create Android Build Directory
         run: |
@@ -251,7 +254,7 @@ jobs:
         id: apk-info
         run: |
           cd android-build
-          VERSION="${{ steps.version.outputs.version }}"
+          VERSION="${{ needs.check-version-update.outputs.version }}"
           
           # APK 파일 찾기
           APK_PATHS=(
