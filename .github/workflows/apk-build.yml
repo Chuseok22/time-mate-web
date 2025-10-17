@@ -156,16 +156,22 @@ jobs:
         run: |
           echo "📱 Bubblewrap CLI 설치 중..."
           
-          npm install -g @bubblewrap/cli
+          # 🎯 stdin을 /dev/null로 리다이렉트하여 대화형 프롬프트 방지
+          npm install -g @bubblewrap/cli < /dev/null
           
+          # 🔧 설정 확인 및 업데이트
           bubblewrap updateConfig \
-          --jdkPath="$JAVA_HOME" \
-          --androidSdkPath="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+            --jdkPath="$JAVA_HOME" \
+            --androidSdkPath="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
           
           echo "✅ Bubblewrap CLI 설치 완료"
 
       - name: 🔎 Bubblewrap 버전확인
-        run: bubblewrap --version
+        run: |
+          echo "🔎 Bubblewrap 설정 확인 중..."
+          bubblewrap --version
+          bubblewrap doctor
+          echo "✅ Bubblewrap 설정 확인 완료"
 
       - name: 🔧 Create Android Build Directory
         run: |
