@@ -211,73 +211,54 @@ jobs:
           
           echo "🌐 MeetTime TWA 프로젝트 초기화 중..."
           
-          # expect 스크립트로 자동 응답
-          expect -c "
-          set timeout 300
-          spawn bubblewrap init --manifest ${{ env.WEBSITE_URL }}/manifest.webmanifest --directory .
+          # 🎯 twa-manifest.json 파일을 미리 생성
+          cat > twa-manifest.json << EOF
+          {
+            "packageId": "${{ env.PACKAGE_ID }}",
+            "host": {
+              "scheme": "https",
+              "url": "meet.chuseok22.com"
+            },
+            "name": "${{ env.APP_NAME }}",
+            "launcherName": "${{ env.APP_NAME }}",
+            "display": "standalone",
+            "orientation": "portrait",
+            "themeColor": "#3b82f6",
+            "backgroundColor": "#ffffff",
+            "startUrl": "/",
+            "iconUrl": "${{ env.WEBSITE_URL }}/icons/icon-512x512.png",
+            "maskableIconUrl": "${{ env.WEBSITE_URL }}/icons/icon-512x512.png",
+            "monochromeIconUrl": "${{ env.WEBSITE_URL }}/icons/icon-512x512.png",
+            "splashScreenFadeOutDuration": 300,
+            "enableNotifications": true,
+            "isChromeOSOnly": false,
+            "fullscreen": false,
+            "minSdkVersion": 21,
+            "targetSdkVersion": ${{ env.ANDROID_API_LEVEL }},
+            "versionCode": $(echo "$VERSION" | sed 's/\.//g')$(date +%m%d),
+            "versionName": "$VERSION",
+            "shortcuts": [],
+            "generatorApp": "bubblewrap-cli",
+            "webManifestUrl": "${{ env.WEBSITE_URL }}/manifest.webmanifest",
+            "fallbackType": "customtabs",
+            "features": {
+              "locationDelegation": {
+                "enabled": false
+              },
+              "playBilling": {
+                "enabled": false
+              }
+            },
+            "alphaDependencies": {
+              "enabled": false
+            },
+            "enableSiteSettingsShortcut": true,
+            "isChromeOSOnly": false
+          }
+          EOF
           
-          expect {
-          \"Domain:\" {
-          send \"meet.chuseok22.com\r\"
-          exp_continue
-          }
-          \"URL path:\" {
-          send \"/\r\"
-          exp_continue
-          }
-          \"Application name:\" {
-          send \"${{ env.APP_NAME }}\r\"
-          exp_continue
-          }
-          \"Launcher name:\" {
-          send \"${{ env.APP_NAME }}\r\"
-          exp_continue
-          }
-          \"Display mode:\" {
-          send \"standalone\r\"
-          exp_continue
-          }
-          \"Orientation:\" {
-          send \"portrait\r\"
-          exp_continue
-          }
-          \"Theme color:\" {
-          send \"#3b82f6\r\"
-          exp_continue
-          }
-          \"Background color:\" {
-          send \"#ffffff\r\"
-          exp_continue
-          }
-          \"Start URL:\" {
-          send \"/\r\"
-          exp_continue
-          }
-          \"Enable notifications:\" {
-          send \"y\r\"
-          exp_continue
-          }
-          \"Minimum SDK version:\" {
-          send \"21\r\"
-          exp_continue
-          }
-          \"Target SDK version:\" {
-          send \"${{ env.ANDROID_API_LEVEL }}\r\"
-          exp_continue
-          }
-          \"Version name:\" {
-          send \"$VERSION\r\"
-          exp_continue
-          }
-          \"Version code:\" {
-          send \"$(echo "$VERSION" | sed 's/\.//g')$(date +%m%d)\r\"
-          exp_continue
-          }
-          eof
-          }
-          "
-          
-          echo "✅ TWA 프로젝트 초기화 완료"
+          # 🎯 설정 파일을 사용하여 비대화형 초기화
+          bubblewrap init --manifest "${{ env.WEBSITE_URL }}/manifest.webmanifest" --directory . --skipPwaValidation
 
       - name: 🏗️ Build Signed APK
         run: |
