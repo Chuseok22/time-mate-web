@@ -63,6 +63,7 @@ manifest-checksum.txt
 *.keystore
 *.jks
 android.keystore
+android.keystore.*
 android-keystore.*
 meettime-*.keystore
 release-key.*
