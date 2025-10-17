@@ -209,25 +209,26 @@ jobs:
           cd android-build
           VERSION="${{ needs.check-version-update.outputs.version }}"
           
-          bubblewrap init \
-            --manifest ${{ env.WEBSITE_URL }}/manifest.webmanifest \
-            --directory . \
-            --packageId ${{ env.PACKAGE_ID }} \
-            --name "${{ env.APP_NAME }}" \
-            --launcherName "${{ env.APP_NAME }}" \
-            --display standalone \
-            --orientation portrait \
-            --themeColor "#3b82f6" \
-            --backgroundColor "#ffffff" \
-            --startUrl "/" \
-            --iconUrl ${{ env.WEBSITE_URL }}/icons/icon-512x512.png \
-            --maskableIconUrl ${{ env.WEBSITE_URL }}/icons/icon-512x512.png \
-            --splashScreenFadeOutDuration 300 \
-            --enableNotifications true \
-            --minSdkVersion 21 \
-            --targetSdkVersion ${{ env.ANDROID_API_LEVEL }} \
-            --versionCode $(echo "$VERSION" | sed 's/\.//g')$(date +%m%d) \
-            --versionName "$VERSION"
+          echo "🌐 MeetTime TWA 프로젝트 초기화 중..."
+          
+          # 🎯 자동 응답으로 대화형 프롬프트 처리
+          {
+            echo "meet.chuseok22.com"  # Domain
+            echo "/"                  # URL path
+            echo "${{ env.APP_NAME }}" # App name
+            echo "${{ env.APP_NAME }}" # Launcher name
+            echo "portrait"           # Orientation
+            echo "#3b82f6"           # Theme color
+            echo "#ffffff"           # Background color
+            echo "/"                 # Start URL
+            echo "y"                 # Enable notifications
+            echo "21"                # Min SDK version
+            echo "${{ env.ANDROID_API_LEVEL }}" # Target SDK version
+            echo "$VERSION"          # Version name
+            echo "$(echo "$VERSION" | sed 's/\.//g')$(date +%m%d)" # Version code
+          } | bubblewrap init \
+            --manifest "${{ env.WEBSITE_URL }}/manifest.webmanifest" \
+            --directory .
           
           echo "✅ TWA 프로젝트 초기화 완료"
 
