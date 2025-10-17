@@ -31,6 +31,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false # GITHUB_TOKEN 자격증명 제거 (PAT 푸시에 간섭 방지)
 
       - name: 커밋 메시지 확인
         id: check-commit
@@ -204,19 +205,32 @@ jobs:
 
           echo "🏷️ Git 태그 생성 완료: v$NEW_VERSION"
 
-      - name: 📤 Push Changes
+      - name: 📤 Push Changes with PAT
         if: steps.check-commit.outputs.should-update == 'true'
+        env:
+          PAT: ${{ secrets.PAT_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
+          set -e
+          if [ -z "$PAT" ]; then
+            echo "❌ secrets.PAT_TOKEN 가 설정되지 않았습니다."; exit 1
+          fi
           NEW_VERSION="${{ steps.new-version.outputs.new }}"
           TAG_EXISTED="${{ steps.git-tag.outputs.tag-existed }}"
-          
-          # 변경사항과 태그 푸시
-          git push origin main
+          BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+
+          # 혹시 남아있을 수 있는 GITHUB_TOKEN extraheader 제거
+          git config --unset-all http.https://github.com/.extraheader || true
+
+          # 브랜치 푸시
+          git push "https://x-access-token:${PAT}@github.com/${REPO}.git" HEAD:${BRANCH}
+
+          # 태그 푸시(새 태그일 때만)
           if [ "$TAG_EXISTED" != "true" ]; then
-            git push origin "v$NEW_VERSION"
+            git push "https://x-access-token:${PAT}@github.com/${REPO}.git" "v${NEW_VERSION}"
           fi
-          
-          echo "📤 변경사항 푸시 완료"
+
+          echo "📤 변경사항 & 태그(PAT) 푸시 완료"
 
       - name: 📊 Summary
         if: steps.check-commit.outputs.should-update == 'true'
