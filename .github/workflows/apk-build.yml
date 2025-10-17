@@ -155,9 +155,17 @@ jobs:
       - name: 📱 Install Bubblewrap CLI
         run: |
           echo "📱 Bubblewrap CLI 설치 중..."
+          
           npm install -g @bubblewrap/cli
-          bubblewrap --version
+          
+          bubblewrap updateConfig \
+          --jdkPath="$JAVA_HOME" \
+          --androidSdkPath="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          
           echo "✅ Bubblewrap CLI 설치 완료"
+
+      - name: 🔎 Bubblewrap 버전확인
+        run: bubblewrap --version
 
       - name: 🔧 Create Android Build Directory
         run: |
