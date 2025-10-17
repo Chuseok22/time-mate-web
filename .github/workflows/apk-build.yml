@@ -211,24 +211,71 @@ jobs:
           
           echo "🌐 MeetTime TWA 프로젝트 초기화 중..."
           
-          # 🎯 자동 응답으로 대화형 프롬프트 처리
-          {
-            echo "meet.chuseok22.com"  # Domain
-            echo "/"                  # URL path
-            echo "${{ env.APP_NAME }}" # App name
-            echo "${{ env.APP_NAME }}" # Launcher name
-            echo "portrait"           # Orientation
-            echo "#3b82f6"           # Theme color
-            echo "#ffffff"           # Background color
-            echo "/"                 # Start URL
-            echo "y"                 # Enable notifications
-            echo "21"                # Min SDK version
-            echo "${{ env.ANDROID_API_LEVEL }}" # Target SDK version
-            echo "$VERSION"          # Version name
-            echo "$(echo "$VERSION" | sed 's/\.//g')$(date +%m%d)" # Version code
-          } | bubblewrap init \
-            --manifest "${{ env.WEBSITE_URL }}/manifest.webmanifest" \
-            --directory .
+          # expect 스크립트로 자동 응답
+          expect -c "
+          set timeout 300
+          spawn bubblewrap init --manifest ${{ env.WEBSITE_URL }}/manifest.webmanifest --directory .
+          
+          expect {
+          \"Domain:\" {
+          send \"meet.chuseok22.com\r\"
+          exp_continue
+          }
+          \"URL path:\" {
+          send \"/\r\"
+          exp_continue
+          }
+          \"Application name:\" {
+          send \"${{ env.APP_NAME }}\r\"
+          exp_continue
+          }
+          \"Launcher name:\" {
+          send \"${{ env.APP_NAME }}\r\"
+          exp_continue
+          }
+          \"Display mode:\" {
+          send \"standalone\r\"
+          exp_continue
+          }
+          \"Orientation:\" {
+          send \"portrait\r\"
+          exp_continue
+          }
+          \"Theme color:\" {
+          send \"#3b82f6\r\"
+          exp_continue
+          }
+          \"Background color:\" {
+          send \"#ffffff\r\"
+          exp_continue
+          }
+          \"Start URL:\" {
+          send \"/\r\"
+          exp_continue
+          }
+          \"Enable notifications:\" {
+          send \"y\r\"
+          exp_continue
+          }
+          \"Minimum SDK version:\" {
+          send \"21\r\"
+          exp_continue
+          }
+          \"Target SDK version:\" {
+          send \"${{ env.ANDROID_API_LEVEL }}\r\"
+          exp_continue
+          }
+          \"Version name:\" {
+          send \"$VERSION\r\"
+          exp_continue
+          }
+          \"Version code:\" {
+          send \"$(echo "$VERSION" | sed 's/\.//g')$(date +%m%d)\r\"
+          exp_continue
+          }
+          eof
+          }
+          "
           
           echo "✅ TWA 프로젝트 초기화 완료"
 
