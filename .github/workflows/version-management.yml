@@ -217,13 +217,12 @@ jobs:
           fi
           NEW_VERSION="${{ steps.new-version.outputs.new }}"
           TAG_EXISTED="${{ steps.git-tag.outputs.tag-existed }}"
-          BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
           # 혹시 남아있을 수 있는 GITHUB_TOKEN extraheader 제거
           git config --unset-all http.https://github.com/.extraheader || true
 
           # 브랜치 푸시
-          git push "https://x-access-token:${PAT}@github.com/${REPO}.git" HEAD:${BRANCH}
+          git push "https://x-access-token:${PAT}@github.com/${REPO}.git" HEAD:main
 
           # 태그 푸시(새 태그일 때만)
           if [ "$TAG_EXISTED" != "true" ]; then
