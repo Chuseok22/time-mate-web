@@ -370,6 +370,30 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: 📦 Build Android App Bundle (.aab)
+        run: |
+          cd android-build
+          # 업로드 키로 서명되도록 gradle signingConfig 확인
+          ./gradlew bundleRelease
+        env:
+          BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+          BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.UPLOAD_KEY_PASSWORD }}
+
+      - name: 🧾 Grab AAB
+        id: aab
+        run: |
+          cd android-build
+          AAB="app/build/outputs/bundle/release/app-release.aab"
+          test -f "$AAB" || (echo "AAB not found"; exit 1)
+          cp "$AAB" "$GITHUB_WORKSPACE/meettime-v${{ needs.check-version-update.outputs.version }}.aab"
+          echo "aab-path=$GITHUB_WORKSPACE/meettime-v${{ needs.check-version-update.outputs.version }}.aab" >> $GITHUB_OUTPUT
+
+      - name: ⬆️ Upload AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: meettime-aab-${{ needs.check-version-update.outputs.version }}
+          path: ${{ steps.aab.outputs.aab-path }}
+
       - name: 📊 Build Summary
         run: |
           echo "🎉 MeetTime APK 빌드 성공!"
