@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # release 커밋 ([skip ci])로 재실행되는 러너는 탈출
-    if: ${{ github.event_name != 'push' || (github.event.head_commit != null && !contains(github.event.head_commit.message, '[skip ci]')) }}
+    if: ${{ github.event_name != 'push' || (github.event.head_commit != null && !contains(github.event.head_commit.message, '[skip version]')) }}
 
     outputs:
       version-updated: ${{ steps.check-commit.outputs.should-update }}
@@ -190,7 +190,7 @@ jobs:
           
           # 변경사항 커밋
           git add package.json package-lock.json CHANGELOG.md
-          git commit -m "chore(release): v$NEW_VERSION [skip ci] $COMMIT_MSG"
+          git commit -m "chore(release): v$NEW_VERSION [skip version] $COMMIT_MSG"
   
           # 태그 생성
           TAG="v$NEW_VERSION"

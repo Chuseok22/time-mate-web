@@ -5,6 +5,10 @@ on:
     branches:
       - main
       - test
+    paths-ignore:
+      - 'CHANGELOG.md'
+      - 'package.json'
+      - 'package-lock.json'
 
 env:
   APP_BASE: meet-time
