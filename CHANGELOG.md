@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.6] - 2025-10-20
+
+🐛 **patch**: twa-manifest.json 내부 Digital Asset Links 설정 추가
+
 ## [0.1.5] - 2025-10-20
 
 🐛 **patch**: TWA Digital Asset Links 설정
