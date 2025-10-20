@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.meettime.app",
+      "sha256_cert_fingerprints": [
+        "D8:24:A0:13:43:4F:B1:B6:1E:2F:5C:5E:E6:C9:2F:3B:E3:46:38:1B:7F:EC:DA:EE:C0:0D:24:03:CD:BF:79:97"
+      ]
+    }
+  }
+]
