@@ -5,9 +5,13 @@ permissions:
 
 on:
   push:
+    branches:
+      - main
     paths:
       - .github/labels/issue-label.yml
       - .github/workflows/sync-issue-labels.yaml
+    tags-ignore:
+    - '**'
 
 jobs:
   label-sync:
