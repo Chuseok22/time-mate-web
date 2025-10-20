@@ -56,7 +56,7 @@ export default function SlotParticipantsSheet({
                    initialHeightPct={25}
                    maxHeightPct={70}>
         <div className="flex flex-col items-center gap-4">
-          <h2 className="lg:text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+          <h2 className="lg:text-xl font-semibold text-neutral-900">
             {headerTitle}
           </h2>
 
