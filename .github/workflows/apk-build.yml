@@ -233,6 +233,36 @@ jobs:
             appVersionName: version,          // 문자열
             appVersionCode,                   // 정수 (리딩 제로 없음)
             webManifestUrl: `${env.WEBSITE_URL}/manifest.webmanifest`,
+          
+            // 🎯 Digital Asset Links 설정 추가
+            shortcuts: [],
+            additionalTrustedOrigins: [],
+            retainedBundles: [],
+            enableSiteSettingsShortcut: true,
+            isChromeOSOnly: false,
+            isMetaQuest: false,
+          
+            // 🔑 TWA 설정 강화
+            fallbackType: "customtabs",
+            features: {
+              locationDelegation: {
+                enabled: false
+              },
+              playBilling: {
+                enabled: false
+              }
+            },
+          
+            // 🎯 AndroidManifest.xml 자동 설정
+            androidManifest: {
+              additionalMetaData: [
+                {
+                  name: "asset_statements",
+                  resource: "@string/asset_statements"
+                }
+              ]
+            },
+          
             signingKey: {
               path: "./android.keystore",
               alias: "android"
