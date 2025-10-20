@@ -148,7 +148,7 @@ export default function BottomSheet({
         >
           <div
               className={clsx(
-                  'bg-white dark:bg-neutral-900 rounded-t-2xl shadow-xl ring-1 ring-black/5 dark:ring-white/10',
+                  'bg-white rounded-t-2xl shadow-xl ring-1 ring-black/5',
                   'flex flex-col',
                   dragging ? 'transition-none' : 'transition-[height] duration-300 ease-out',
                   dragging ? 'select-none' : '',
@@ -177,7 +177,7 @@ export default function BottomSheet({
 
             {/* 하단 닫기 버튼 (sticky) */}
             <div
-                className="sticky bottom-0 left-0 right-0 bg-white/90 dark:bg-neutral-900/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 supports-[backdrop-filter]:dark:bg-neutral-900/60 border-t border-neutral-200 dark:border-neutral-800"
+                className="sticky bottom-0 left-0 right-0 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t border-neutral-200"
                 style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)' }}
             >
               <div className="px-4 py-3">
