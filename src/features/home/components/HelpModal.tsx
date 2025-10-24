@@ -36,7 +36,7 @@ export default function HelpModal({
 
           {/* 헤더 */}
           <h2 className="text-lg lg:text-2xl font-bold text-center">
-            홈 화면 설치 (Android / IOS)
+            홈 화면 설치 (Android / iOS)
           </h2>
 
           {/* 구분선 */}
