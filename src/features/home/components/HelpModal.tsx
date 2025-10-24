@@ -32,7 +32,7 @@ export default function HelpModal({
             onClick={stop}
             className="flex flex-col items-center justify-center-safe
                        w-4/5 lg:w-2/3 h-4/5 gap-4 max-w-screen-md bg-white py-10 lg:py-0
-                       shadow-2xl rounded-2xl overflow-y-auto scroll">
+                       shadow-2xl rounded-2xl overflow-y-auto scroll overscroll-y-none">
 
           {/* 헤더 */}
           <h2 className="text-lg lg:text-2xl font-bold text-center">
@@ -42,7 +42,7 @@ export default function HelpModal({
           {/* 구분선 */}
           <div className="bg-gray-700 w-2/3 h-0.5"></div>
 
-          <div className="flex flex-col items-center justify-center gap-2 text-sm lg:text-base">
+          <div className="flex flex-col items-center justify-center gap-2 text-sm lg:text-base font-semibold">
             <p>
               홈 화면에 추가하여 앱처럼 사용하세요!
             </p>
