@@ -25,6 +25,6 @@ jobs:
       plain_version_file: "VERSION"        # Plain 프로젝트일 때 버전 파일 경로
 
       # 릴리스 옵션 (워크플로 설정에 따라 사용)
-      create_release: "true"               # 버전 증가 시 릴리스 생성
+      create_release: "false"               # 버전 증가 시 릴리스 생성
       release_latest: "true"               # 최신 릴리스로 표시
       release_prerelease: "false"          # 프리릴리스로 표시(예: M1, RC)
