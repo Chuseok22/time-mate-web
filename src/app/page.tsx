@@ -1,11 +1,12 @@
 import Image from "next/image";
 import { CalendarPlus, Users } from "lucide-react";
 import ActionCard from "@/features/home/components/ActionCard";
+import HelpButton from "@/features/home/components/HelpButton";
 
 export default function Home() {
   return (
       <div className="flex flex-col min-h-screen items-center bg-main gap-3 w-full py-20">
-        <div className="flex justify-center, items-center text-5xl font-pacifico">
+        <div className="flex justify-center items-center text-5xl font-pacifico">
           meetTime
         </div>
         <div className="flex justify-center items-center text-lg">
@@ -15,8 +16,8 @@ export default function Home() {
           <Image
               src="/icons/icon-512x512.png"
               alt="logo"
-              width="150"
-              height="150"
+              width={150}
+              height={150}
               className="rounded-2xl shadow-xl"
           />
         </div>
@@ -44,6 +45,9 @@ export default function Home() {
           />
         </div>
 
+        <div className="fixed right-4 bottom-4">
+          <HelpButton />
+        </div>
 
       </div>
   );
