@@ -48,12 +48,13 @@ jobs:
         run: |
           set -Eeuo pipefail
           
-          SEMVER_REGEX='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
+          SEMVER_TAG_REGEX='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' # vX.Y.Z
+          SEMVER_VER_REGEX='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' # X.Y.Z
 
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             # 수동 실행인 경우
             TAG="${{ github.event.inputs.tag }}"
-            # FIX: 태그 형식 검증
+            # 태그 형식 검증
             if [[ ! $TAG =~ $SEMVER_REGEX ]]; then
               echo "❌ 잘못된 태그 형식: $TAG (v1.2.3 형식이어야 함)"
               exit 1
@@ -64,16 +65,23 @@ jobs:
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "✅ 수동 실행: $TAG"
           else
-            TAG="${GITHUB_REF#refs/tags/}"
-            if [[ ! $TAG =~ $SEMVER_REGEX ]]; then
-              VERSION="${TAG#v}"
-              echo "should-build=true" >> $GITHUB_OUTPUT
-              echo "tag=$TAG" >> $GITHUB_OUTPUT
-              echo "version=$VERSION" >> $GITHUB_OUTPUT
-              echo "✅ 새 버전 태그 감지: $TAG"
+            RAW_TAG="${{ github.event.client_payload.new_tag }}"
+            RAW_VER="${{ github.event.client_payload.new_version }}"
+          
+            if [ -n "$RAW_TAG" ] && [[ "$RAW_TAG" =~ $SEMVER_TAG_REGEX ]]; then
+              VERSION="${RAW_TAG#v}"
+              echo "should-build=true"  >> "$GITHUB_OUTPUT"
+              echo "tag=$RAW_TAG"       >> "$GITHUB_OUTPUT"
+              echo "version=$VERSION"   >> "$GITHUB_OUTPUT"
+              echo "✅ repository_dispatch tag: $RAW_TAG"
+            elif [ -n "$RAW_VER" ] && [[ "$RAW_VER" =~ $SEMVER_VER_REGEX ]]; then
+              echo "should-build=true"  >> "$GITHUB_OUTPUT"
+              echo "tag=v$RAW_VER"      >> "$GITHUB_OUTPUT"
+              echo "version=$RAW_VER"   >> "$GITHUB_OUTPUT"
+              echo "✅ repository_dispatch version: $RAW_VER"
             else
-              echo "should-build=false" >> $GITHUB_OUTPUT
-              echo "📝 유효한 새 버전 태그가 아님 - APK 빌드 건너뜀"
+              echo "should-build=false" >> "$GITHUB_OUTPUT"
+              echo "📝 repository_dispatch payload에 유효한 tag/version이 없습니다. 빌드 생략"
             fi
           fi
 
