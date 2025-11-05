@@ -128,7 +128,7 @@ export default function TimeGridVote({
 
   // 오토 스크롤 루프
   const stopAutoScroll = useCallback(() => {
-    if (rafIdRef.current != null) {
+    if (rafIdRef.current !== null) {
       cancelAnimationFrame(rafIdRef.current);
       rafIdRef.current = null;
     }

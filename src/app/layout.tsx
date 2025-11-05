@@ -47,7 +47,7 @@ export default function RootLayout({
   return (
       <html lang="ko"
             className={pacifico.variable}>
-      <body className="min-h-screen-safe bg-white text-gray-900 antialiased no-scrollbar">
+      <body className="min-h-screen-safe bg-white text-gray-900 antialiased">
 
       <div className="min-h-screen-safe pt-safe-top pr-safe-right pb-safe-bottom pl-safe-left">
         <div className="mx-auto w-full max-w-screen-lg">

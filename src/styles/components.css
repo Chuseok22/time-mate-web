@@ -16,6 +16,6 @@
     scrollbar-width: none;
   }
   .no-scrollbar::-webkit-scrollbar{
-    display:none
+    display:none;
   }
 }
