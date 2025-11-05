@@ -40,7 +40,7 @@ export default function TimeGridView({
   return (
       <>
         <div className="w-full">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto no-scrollbar">
             <div className="w-max mx-auto">
               {/* 날짜 헤더 */}
               <div className="grid"
