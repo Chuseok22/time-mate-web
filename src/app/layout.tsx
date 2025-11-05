@@ -1,12 +1,33 @@
 import type { Metadata } from "next";
 import { Pacifico } from "next/font/google";
 import "./globals.css";
+import localFont from "next/font/local"
 
 const pacifico = Pacifico({
   weight: "400",
   variable: "--font-pacifico",
   subsets: ["latin"],
 })
+
+const pretendard = localFont({
+  src: "../../public/fonts/PretendardVariable.woff2",
+  variable: "--font-pretendard",
+  weight: "100 900",
+  style: "normal",
+  display: "swap",
+  preload: true,
+  fallback: [
+    "system-ui",
+    "-apple-system",
+    "Apple SD Gothic Neo",
+    "Noto Sans KR",
+    "Segoe UI",
+    "Roboto",
+    "Helvetica Neue",
+    "Arial",
+    "sans-serif",
+  ],
+});
 
 export const metadata: Metadata = {
   title: "MeetTime | 모임 시간 정하기",
@@ -45,17 +66,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-      <html lang="ko"
-            className={pacifico.variable}>
-      <body className="min-h-screen-safe bg-white text-gray-900 antialiased">
+    <html lang="ko"
+          className={`${pretendard.variable} ${pacifico.variable}`}>
+    <body className="min-h-screen-safe bg-white text-gray-900 antialiased">
 
-      <div className="min-h-screen-safe pt-safe-top pr-safe-right pb-safe-bottom pl-safe-left">
-        <div className="mx-auto w-full max-w-screen-lg">
-          {children}
-        </div>
+    <div className="min-h-screen-safe pt-safe-top pr-safe-right pb-safe-bottom pl-safe-left">
+      <div className="mx-auto w-full max-w-screen-lg">
+        {children}
       </div>
+    </div>
 
-      </body>
-      </html>
+    </body>
+    </html>
   );
 }
