@@ -9,3 +9,13 @@
     @apply ring-gray-100 ring-2 outline-none p-3.5 rounded-2xl focus:ring-blue-500;
   }
 }
+
+@layer utilities {
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar{
+    display:none
+  }
+}
