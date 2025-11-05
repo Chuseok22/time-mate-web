@@ -1,10 +1,13 @@
 'use client';
 import { AvailabilityRequest, AvailabilityTimeRequest, RoomInfoResponse } from "@/features/meeting/types/apiTypes";
 import { JSX, useCallback, useState } from "react";
-import TimeGrid from "@/features/meeting/components/TimeGrid";
 import { apiClient } from "@/lib/api/apiClient";
 import { useRouter } from "next/navigation";
 import { ERROR_MESSAGES, ErrorCode } from "@/lib/errors/errorCodes";
+import { formatDateForDetailDisplay, toLocalDate } from "@/utils/dateUtils";
+import { getAvailabilityCount, getDayNameColor } from "@/features/meeting/components/timeGridHelper";
+import { ALL_TIME_SLOTS } from "@/types/timeSlot";
+import { getLabelOnlyOnHour } from "@/utils/timeSlotUtils";
 
 export type SelectedMap = Map<string, Set<string>>;
 
@@ -77,12 +80,13 @@ export default function TimeGridVote({
     setError(null);
 
     try {
-      const availabilityTimeRequests: AvailabilityTimeRequest[] = Array.from(selectedMap.entries()).map(
-          ([date, timeSlots]) => ({
-            date,
-            timeSlots: Array.from(timeSlots),
-          })
-      );
+      const availabilityTimeRequests: AvailabilityTimeRequest[] =
+          Array.from(selectedMap.entries())
+          .map(([date, timeSlots]) => ({
+                date,
+                timeSlots: Array.from(timeSlots),
+              })
+          );
 
       const request: AvailabilityRequest = {
         participantId,
@@ -102,15 +106,66 @@ export default function TimeGridVote({
     }
   }
 
+  const gridCols = `repeat(${roomInfo.dates.length}, 100px)`;
+
   return (
       <div className="w-full">
-        {/* 공통 그리드 */}
-        <TimeGrid
-            roomInfo={roomInfo}
-            onTimeSlotClick={handleTimeSlotClick}
-            selectedSlots={selectedMap}
-            isVoteMode={true}
-        />
+        <div className="overflow-x-auto">
+          <div className="w-max mx-auto">
+            {/* 날짜 헤더 */}
+            <div
+                className="grid"
+                style={{ gridTemplateColumns: gridCols }}
+            >
+              {roomInfo.dates.map((date: string) => {
+                const { month, day, dayName } = formatDateForDetailDisplay(toLocalDate(date));
+                return (
+                    <div
+                        key={date}
+                        className="text-center"
+                    >
+                      <div>{month}월 {day}일</div>
+                      <div className={getDayNameColor(dayName)}>{dayName}요일</div>
+                    </div>
+                );
+              })}
+            </div>
+
+            {/* 타임 슬롯 */}
+            <div>
+              {ALL_TIME_SLOTS.map((slot) => (
+                  <div
+                      key={slot}
+                      className="grid items-center"
+                      style={{ gridTemplateColumns: gridCols }}
+                  >
+                    {roomInfo.dates.map((date) => {
+                      const isSelected = selectedMap.get(date)?.has(slot) ?? false;
+                      const colorClass = isSelected
+                          ? "bg-green-500 text-white"
+                          : 'bg-gray-200 hover:bg-gray-300 text-gray-400 hover:text-gray-500';
+
+                      return (
+                          <button
+                              key={`${date}-${slot}`}
+                              type="button"
+                              onClick={() => handleTimeSlotClick(date, slot)}
+                              className={`h-8 rounded-lg m-0.5
+                                          hover:cursor-pointer
+                                          text-sm transition
+                                          ${colorClass}
+                                        `}
+                          >
+                            {getLabelOnlyOnHour(slot)}
+                          </button>
+                      )
+                    })}
+                  </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
 
         {/* 하단 제출 바 */}
         <div className="sticky bottom-0 mt-4 flex flex-col items-center gap-3 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/50 p-3 rounded-xl border">

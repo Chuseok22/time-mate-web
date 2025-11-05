@@ -369,6 +369,22 @@ jobs:
           path: ${{ steps.apk-info.outputs.apk-path }}
           retention-days: 90
 
+      - name: 🧾 Grab AAB (from Bubblewrap)
+        id: aab
+        run: |
+          cd android-build
+          test -f app-release-bundle.aab || (echo "AAB not found"; exit 1)
+          DEST="$GITHUB_WORKSPACE/meettime-v${{ needs.check-version-update.outputs.version }}.aab"
+          cp app-release-bundle.aab "$DEST"
+          echo "aab-path=$DEST" >> $GITHUB_OUTPUT
+
+      - name: ⬆️ Upload AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: meettime-aab-${{ needs.check-version-update.outputs.version }}
+          path: ${{ steps.aab.outputs.aab-path }}
+          retention-days: 90
+
       - name: 🎉 Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -379,6 +395,7 @@ jobs:
           generate_release_notes: true
           files: |
             ${{ steps.apk-info.outputs.apk-path }}
+            ${{ steps.aab.outputs.aab-path }}
           body: |
             ## 🚀 MeetTime ${{ needs.check-version-update.outputs.tag }}
             
@@ -399,21 +416,6 @@ jobs:
             - **패키지 ID**: `${{ env.PACKAGE_ID }}`
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🧾 Grab AAB (from Bubblewrap)
-        id: aab
-        run: |
-          cd android-build
-          test -f app-release-bundle.aab || (echo "AAB not found"; exit 1)
-          DEST="$GITHUB_WORKSPACE/meettime-v${{ needs.check-version-update.outputs.version }}.aab"
-          cp app-release-bundle.aab "$DEST"
-          echo "aab-path=$DEST" >> $GITHUB_OUTPUT
-
-      - name: ⬆️ Upload AAB Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: meettime-aab-${{ needs.check-version-update.outputs.version }}
-          path: ${{ steps.aab.outputs.aab-path }}
 
       - name: 📊 Build Summary
         run: |

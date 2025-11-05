@@ -3,7 +3,6 @@ import { JSX } from "react";
 import Header from "@/components/Header";
 import BodySection from "@/components/BodySection";
 import { CalendarCheck } from "lucide-react";
-import TimeGridContainer from "@/features/meeting/containers/TimeGridContainer";
 import { TIME_SLOT_MAP } from "@/types/timeSlot";
 import { apiServer } from "@/lib/api/apiServer";
 import { getMostPopularSlots } from "@/features/meeting/utils/helper";
@@ -12,6 +11,7 @@ import CopyButton from "@/features/meeting/components/CopyButton";
 import JoinParticipantSheet from "@/features/meeting/components/JoinParticipantSheet";
 import { BottomSheetProvider } from "@/components/BottomSheetProvider";
 import { ORIGIN_URL } from "@/lib/types";
+import TimeGridView from "@/features/meeting/components/TimeGridView";
 
 export default async function MeetingPage({
   params,
@@ -92,7 +92,7 @@ export default async function MeetingPage({
               </div>
 
               <div className="flex w-full items-center justify-center border border-sky-300 rounded-2xl p-4">
-                <TimeGridContainer roomInfo={roomInfo} />
+                <TimeGridView roomInfo={roomInfo} />
               </div>
             </BodySection>
           </main>

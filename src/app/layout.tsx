@@ -45,7 +45,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-      <html lang="ko" className={pacifico.variable}>
+      <html lang="ko"
+            className={pacifico.variable}>
       <body className="min-h-screen-safe bg-white text-gray-900 antialiased">
 
       <div className="min-h-screen-safe pt-safe-top pr-safe-right pb-safe-bottom pl-safe-left">
