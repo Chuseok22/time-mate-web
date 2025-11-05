@@ -47,12 +47,14 @@ jobs:
         id: check-update
         run: |
           set -Eeuo pipefail
+          
+          SEMVER_REGEX='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
 
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             # 수동 실행인 경우
             TAG="${{ github.event.inputs.tag }}"
             # FIX: 태그 형식 검증
-            if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            if [[ ! $TAG =~ $SEMVER_REGEX ]]; then
               echo "❌ 잘못된 태그 형식: $TAG (v1.2.3 형식이어야 함)"
               exit 1
             fi
@@ -63,7 +65,7 @@ jobs:
             echo "✅ 수동 실행: $TAG"
           else
             TAG="${GITHUB_REF#refs/tags/}"
-            if [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            if [[ ! $TAG =~ $SEMVER_REGEX ]]; then
               VERSION="${TAG#v}"
               echo "should-build=true" >> $GITHUB_OUTPUT
               echo "tag=$TAG" >> $GITHUB_OUTPUT
