@@ -5,8 +5,8 @@ import {
 } from "@/features/meeting/types/apiTypes";
 
 export function findDateEntry(
-    roomInfo: RoomInfoResponse,
-    date: string | null,
+  roomInfo: RoomInfoResponse,
+  date: string | null,
 ): DateAvailabilityResponse | undefined {
   if (!date) {
     return undefined;
@@ -15,8 +15,8 @@ export function findDateEntry(
 }
 
 export function findTimeSlotEntry(
-    dateEntry: DateAvailabilityResponse | undefined,
-    timeSlot: string | null,
+  dateEntry: DateAvailabilityResponse | undefined,
+  timeSlot: string | null,
 ): TimeSlotParticipantsResponse | undefined {
   if (!dateEntry || !timeSlot) {
     return undefined;

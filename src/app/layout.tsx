@@ -68,15 +68,15 @@ export default function RootLayout({
   return (
     <html lang="ko"
           className={`${pretendard.variable} ${pacifico.variable}`}>
-    <body className="min-h-screen-safe bg-white text-gray-900 antialiased">
+      <body className="min-h-screen-safe bg-white text-gray-900 antialiased">
 
-    <div className="min-h-screen-safe pt-safe-top pr-safe-right pb-safe-bottom pl-safe-left">
-      <div className="mx-auto w-full max-w-screen-lg">
-        {children}
-      </div>
-    </div>
+        <div className="min-h-screen-safe pt-safe-top pr-safe-right pb-safe-bottom pl-safe-left">
+          <div className="mx-auto w-full max-w-screen-lg">
+            {children}
+          </div>
+        </div>
 
-    </body>
+      </body>
     </html>
   );
 }

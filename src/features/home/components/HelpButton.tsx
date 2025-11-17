@@ -21,24 +21,24 @@ export default function HelpButton() {
   }, [open]);
 
   return (
-      <>
-        <button
-            type="button"
-            onClick={() => setOpen(true)}
-            aria-label="도움말 열기"
-            aria-expanded={open}
-            className="inline-flex items-center justify-center rounded-full
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="도움말 열기"
+        aria-expanded={open}
+        className="inline-flex items-center justify-center rounded-full
             p-1.5 bg-white hover:cursor-pointer shadow-2xl
             hover:bg-gray-100/80 transition"
-        >
-          <HelpCircle className="size-8" />
-        </button>
+      >
+        <HelpCircle className="size-8" />
+      </button>
 
-        <HelpModal
-            open={open}
-            onClose={onClose}
-        />
+      <HelpModal
+        open={open}
+        onClose={onClose}
+      />
 
-      </>
+    </>
   );
 };

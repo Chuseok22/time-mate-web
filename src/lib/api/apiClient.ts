@@ -4,8 +4,8 @@ import { CustomError } from "@/lib/errors/customError";
 
 export class ApiClient {
   async request<T>(
-      endpoint: string,
-      options: RequestInit = {}
+    endpoint: string,
+    options: RequestInit = {}
   ): Promise<T> {
     const controller = new AbortController();
 

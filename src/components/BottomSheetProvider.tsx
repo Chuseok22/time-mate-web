@@ -33,9 +33,9 @@ export function BottomSheetProvider({
 
 
   return (
-      <BottomSheetContext.Provider value={value}>
-        {children}
-      </BottomSheetContext.Provider>
+    <BottomSheetContext.Provider value={value}>
+      {children}
+    </BottomSheetContext.Provider>
   );
 }
 

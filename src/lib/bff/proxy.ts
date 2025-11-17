@@ -10,9 +10,9 @@ function joinUrl(base: string, path: string, search: string): string {
 
 /** 요청 헤더 복제 + 정리 */
 function buildUpstreamHeaders(
-    req: NextRequest,
-    backendHost: string,
-    config: ProxyConfig,
+  req: NextRequest,
+  backendHost: string,
+  config: ProxyConfig,
 ): Headers {
   const headers = new Headers(req.headers);
 
@@ -105,11 +105,11 @@ export function createProxy(config: ProxyConfig): ProxyHandler {
 
       // 네트워크 오류 등의 경우 500 응답
       return NextResponse.json(
-          {
-            error: 'Internal Server Error',
-            message: 'Backend API 호출 중 오류가 발생했습니다.'
-          },
-          { status: 500 }
+        {
+          error: 'Internal Server Error',
+          message: 'Backend API 호출 중 오류가 발생했습니다.'
+        },
+        { status: 500 }
       );
     }
   };

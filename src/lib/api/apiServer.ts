@@ -14,8 +14,8 @@ export class ApiServer {
    * 공통 요청 메서드
    */
   async request<T>(
-      endpoint: string,
-      options: RequestInit = {}
+    endpoint: string,
+    options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
 

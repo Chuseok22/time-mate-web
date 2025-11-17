@@ -23,7 +23,7 @@ export function useCalendar(initialDate = new Date()) {
     setSelectedDates(prev => {
       // 이미 선택된 날짜인지 검증
       const existingIndex = prev.findIndex(item =>
-          isSameDate(item.date, newDate)
+        isSameDate(item.date, newDate)
       );
 
       if (existingIndex >= 0) {

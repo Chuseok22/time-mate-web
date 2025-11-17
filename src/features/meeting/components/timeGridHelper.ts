@@ -28,9 +28,9 @@ export function getDayNameColor(dayName: string): string {
 }
 
 export function isSlotSelected(
-    date: string,
-    timeSlot: string,
-    selectedSlots?: SelectedMap,
+  date: string,
+  timeSlot: string,
+  selectedSlots?: SelectedMap,
 ): boolean {
   return selectedSlots?.get(date)?.has(timeSlot) ?? false;
 }
