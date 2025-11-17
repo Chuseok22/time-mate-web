@@ -57,7 +57,7 @@ export default function SlotParticipantsSheet({
       initialHeightPct={40}
       maxHeightPct={70}
     >
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-4 pb-20">
         <h2 className="lg:text-xl font-semibold text-neutral-900">
           {headerTitle}
         </h2>
@@ -108,11 +108,11 @@ export default function SlotParticipantsSheet({
         </div>
 
         {/* 하단 닫기 버튼 (sticky) */}
-        <div className="w-10/12 fixed bottom-0
+        <div className="w-full sticky bottom-0
                         bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60
                         border-t border-neutral-200"
         >
-          <div className="py-3">
+          <div className="px-4 py-3">
             <button
               type="button"
               onClick={onClose}
