@@ -108,16 +108,16 @@ export default function SlotParticipantsSheet({
         </div>
 
         {/* 하단 닫기 버튼 (sticky) */}
-        <div className="w-full sticky bottom-0 left-0 right-0
-                      bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60
+        <div className="w-10/12 fixed bottom-0
+                        bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60
                         border-t border-neutral-200"
         >
-          <div className="px-4 py-3">
+          <div className="py-3">
             <button
               type="button"
               onClick={onClose}
               className="w-full rounded-xl py-3 text-center font-medium
-                       bg-blue-500 text-white hover:opacity-90 hover:cursor-pointer
+                         bg-blue-500 text-white hover:opacity-90 hover:cursor-pointer
                          active:opacity-80 transition"
             >
               닫기

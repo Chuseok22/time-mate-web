@@ -136,7 +136,7 @@ export default function BottomSheet({
       <div
         ref={sheetRef}
         role="dialog"
-        aria-modal="false"
+        aria-modal="true"
         aria-label="바텀시트"
         className={clsx(
           'pointer-events-auto mx-auto w-full max-w-screen-lg px-4',
