@@ -9,20 +9,20 @@ import { CalendarCheck } from "lucide-react";
 import CopyButton from "@/features/meeting/components/CopyButton";
 import { ORIGIN_URL } from "@/lib/types";
 
-type searchParams = Record<string, string>;
+interface searchParams {
+  participantId?: string;
+  username?: string;
+}
 
 export default async function VotePage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: searchParams;
+  searchParams: Promise<searchParams>;
 }): Promise<JSX.Element> {
   const { id: roomId } = await params;
-
-  // 쿼리스트링에서 participantId, username 추출
-  const participantId: string = searchParams.participantId;
-  const username: string = searchParams.username;
+  const { participantId, username } = await searchParams;
 
   if (!participantId || !username) {
     redirect(`/meeting/${roomId}`);
@@ -31,44 +31,44 @@ export default async function VotePage({
   const roomInfo: RoomInfoResponse = await apiServer.get<RoomInfoResponse>(`/api/rooms/${roomId}`);
 
   return (
-      <div className="min-h-screen bg-main">
-        <Header title={`${username}`} />
+    <div className="min-h-screen bg-main">
+      <Header title={`${username}`} />
 
-        <main className="main-container">
+      <main className="main-container">
 
-          <BodySection>
-            <div className="flex flex-col w-full gap-6">
-              <div className="flex flex-row w-full items-center justify-center gap-3">
-                <div className="flex flex-1 items-center justify-center">
-                  <div className="bg-main p-3.5 rounded-2xl">
-                    <CalendarCheck />
-                  </div>
+        <BodySection>
+          <div className="flex flex-col w-full gap-6">
+            <div className="flex flex-row w-full items-center justify-center gap-3">
+              <div className="flex flex-1 items-center justify-center">
+                <div className="bg-main p-3.5 rounded-2xl">
+                  <CalendarCheck />
                 </div>
-                <div className="flex flex-col flex-5 gap-2">
-                  <div className="text-lg font-bold">
-                    {roomInfo.title}
+              </div>
+              <div className="flex flex-col flex-5 gap-2">
+                <div className="text-lg font-bold">
+                  {roomInfo.title}
+                </div>
+                <div className="flex flex-row items-center gap-2">
+                  <div className="font-semibold">
+                    모임 코드: {roomInfo.joinCode}
                   </div>
-                  <div className="flex flex-row items-center gap-2">
-                    <div className="font-semibold">
-                      모임 코드: {roomInfo.joinCode}
-                    </div>
-                    <CopyButton
-                        title={roomInfo.title}
-                        url={`${ORIGIN_URL}/meeting/${roomInfo.meetingRoomId}`}
-                        joinCode={roomInfo.joinCode} />
-                  </div>
+                  <CopyButton
+                    title={roomInfo.title}
+                    url={`${ORIGIN_URL}/meeting/${roomInfo.meetingRoomId}`}
+                    joinCode={roomInfo.joinCode} />
                 </div>
               </div>
             </div>
-          </BodySection>
+          </div>
+        </BodySection>
 
-          <BodySection>
-            <TimeGridVote
-                roomInfo={roomInfo}
-                participantId={participantId}
-            />
-          </BodySection>
-        </main>
-      </div>
+        <BodySection>
+          <TimeGridVote
+            roomInfo={roomInfo}
+            participantId={participantId}
+          />
+        </BodySection>
+      </main>
+    </div>
   );
 };

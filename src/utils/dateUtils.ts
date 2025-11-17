@@ -1,8 +1,8 @@
 // 날짜 비교 (시간 제외)
 export function isSameDate(date1: Date, date2: Date): boolean {
   return date1.getFullYear() === date2.getFullYear() &&
-      date1.getMonth() === date2.getMonth() &&
-      date1.getDate() === date2.getDate();
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate();
 }
 
 // LocalDate(시스템 타임존) 기준 YYYY-MM-DD 문자열

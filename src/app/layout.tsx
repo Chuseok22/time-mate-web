@@ -29,9 +29,13 @@ const pretendard = localFont({
   ],
 });
 
+const SITE_URL = "https://meet.chuseok22.com"
+
 export const metadata: Metadata = {
-  title: "MeetTime | 모임 시간 정하기",
-  description: "모임 구성원들의 가능 시간을 손쉽게 수집하고, 최적의 모임 시간을 추천하는 서비스",
+  metadataBase: new URL(SITE_URL),
+
+  title: "MeetTime",
+  description: "약속/모임 시간 정하기. 팀원들과 손쉽게 일정을 정해보세요. 무료로 이용 가능합니다. Schedule your meetings. Easily coordinate times with your teammates — it’s completely free to use.",
   applicationName: 'MeetTime',
   manifest: '/manifest.webmanifest',
   appleWebApp: {
@@ -68,15 +72,15 @@ export default function RootLayout({
   return (
     <html lang="ko"
           className={`${pretendard.variable} ${pacifico.variable}`}>
-    <body className="min-h-screen-safe bg-white text-gray-900 antialiased">
+      <body className="min-h-screen-safe bg-white text-gray-900 antialiased">
 
-    <div className="min-h-screen-safe pt-safe-top pr-safe-right pb-safe-bottom pl-safe-left">
-      <div className="mx-auto w-full max-w-screen-lg">
-        {children}
-      </div>
-    </div>
+        <div className="min-h-screen-safe pt-safe-top pr-safe-right pb-safe-bottom pl-safe-left">
+          <div className="mx-auto w-full max-w-screen-lg">
+            {children}
+          </div>
+        </div>
 
-    </body>
+      </body>
     </html>
   );
 }

@@ -2,9 +2,11 @@
   .bg-main {
     @apply bg-sky-100;
   }
+
   .main-container {
     @apply flex flex-col items-center px-4 lg:px-8 py-4 gap-8;
   }
+
   .input-primary {
     @apply ring-gray-100 ring-2 outline-none p-3.5 rounded-2xl focus:ring-blue-500;
   }
@@ -15,7 +17,8 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  .no-scrollbar::-webkit-scrollbar{
-    display:none;
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }

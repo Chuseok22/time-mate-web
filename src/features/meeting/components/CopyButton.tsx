@@ -38,19 +38,19 @@ export default function CopyButton({
   }, [copied, successDurationMs]);
 
   return (
-      <button
-          type='button'
-          onClick={copyToClipboard}
-          className={clsx(
-              "bg-sky-500 rounded-xl text-white px-4 py-0.5",
-              "flex items-center justify-center",
-              "hover:cursor-pointer",
-              "hover:bg-sky-600 active:bg-sky-700 transition",
-              className
-          )}
-      >
-        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-      </button>
+    <button
+      type='button'
+      onClick={copyToClipboard}
+      className={clsx(
+        "bg-sky-500 rounded-xl text-white px-4 py-0.5",
+        "flex items-center justify-center",
+        "hover:cursor-pointer",
+        "hover:bg-sky-600 active:bg-sky-700 transition",
+        className
+      )}
+    >
+      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+    </button>
 
   );
 };

@@ -6,8 +6,8 @@ export default function BodySection({
   children: React.ReactNode;
 }>) {
   return (
-      <div className="flex flex-col bg-white rounded-2xl w-full px-6 py-8 items-center">
-        {children}
-      </div>
+    <div className="flex flex-col bg-white rounded-2xl w-full px-6 py-8 items-center">
+      {children}
+    </div>
   )
 };

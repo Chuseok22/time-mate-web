@@ -35,38 +35,38 @@ export default function JoinCodeForm() {
   };
 
   return (
-      <form
-          onSubmit={onSubmit}
-          className="flex flex-col gap-4 w-full"
-      >
-        <div className="flex flex-col gap-2">
-          <label className="">
-            모임 코드 <span className="text-red-500">*</span>
-          </label>
-          <input
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value)}
-              placeholder="모임 코드를 입력하세요"
-              className="ring-gray-100 ring-2 outline-none p-3.5 rounded-2xl focus:ring-blue-500"
-              disabled={isLoading}
-          />
-        </div>
+    <form
+      onSubmit={onSubmit}
+      className="flex flex-col gap-4 w-full"
+    >
+      <div className="flex flex-col gap-2">
+        <label className="">
+          모임 코드 <span className="text-red-500">*</span>
+        </label>
+        <input
+          value={joinCode}
+          onChange={(e) => setJoinCode(e.target.value)}
+          placeholder="모임 코드를 입력하세요"
+          className="ring-gray-100 ring-2 outline-none p-3.5 rounded-2xl focus:ring-blue-500"
+          disabled={isLoading}
+        />
+      </div>
 
-        {error ? <div className="text-red-500">{error}</div> : null}
+      {error ? <div className="text-red-500">{error}</div> : null}
 
-        <button
-            type="submit"
-            disabled={!joinCode.trim() || isLoading}
-            className="flex justify-center items-center
+      <button
+        type="submit"
+        disabled={!joinCode.trim() || isLoading}
+        className="flex justify-center items-center
                          bg-blue-500 text-white text-xl
                          font-bold rounded-2xl
                          w-full py-4 shadow-xl
                          hover:cursor-pointer hover:bg-blue-300
                          disabled:bg-gray-300 disabled:cursor-not-allowed
                          transition"
-        >
-          {isLoading ? '참여중...' : '참여하기'}
-        </button>
-      </form>
+      >
+        {isLoading ? '참여중...' : '참여하기'}
+      </button>
+    </form>
   );
 };

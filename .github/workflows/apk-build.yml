@@ -2,7 +2,7 @@ name: APK Build & Release
 
 on:
   repository_dispatch:
-    types: [version-bumped]
+    types: [ version-bumped ]
 
   workflow_dispatch:
     inputs:
@@ -145,7 +145,7 @@ jobs:
           npm run build
           
           echo "✅ MeetTime 웹앱 빌드 완료"
-          
+
       - name: 📱 Install Bubblewrap CLI
         run: |
           echo "📱 Bubblewrap CLI 설치 중..."

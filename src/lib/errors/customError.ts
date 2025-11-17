@@ -6,9 +6,9 @@ export class CustomError extends Error {
   public readonly userMessage: string;
 
   constructor(
-      code: ErrorCode,
-      statusCode: number = 500,
-      customMessage?: string
+    code: ErrorCode,
+    statusCode: number = 500,
+    customMessage?: string
   ) {
     const message = ERROR_MESSAGES[code] || '알 수 없는 오류가 발생했습니다.';
     super(message);

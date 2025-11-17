@@ -1,5 +1,5 @@
 'use client';
-import { createContext, ReactNode, useCallback, useContext, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from "react";
 import { CustomError } from "@/lib/errors/customError";
 import { ErrorCode } from "@/lib/errors/errorCodes";
 
@@ -29,11 +29,13 @@ export function BottomSheetProvider({
 
   const isOpen = useCallback((id: BottomSheetId) => activeId === id, [activeId]);
 
+  const value = useMemo(() => ({ activeId, open, close, isOpen }), [activeId, open, close, isOpen]);
+
 
   return (
-      <BottomSheetContext.Provider value={{ activeId, open, close, isOpen }}>
-        {children}
-      </BottomSheetContext.Provider>
+    <BottomSheetContext.Provider value={value}>
+      {children}
+    </BottomSheetContext.Provider>
   );
 }
 
