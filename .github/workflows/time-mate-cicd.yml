@@ -9,6 +9,7 @@ on:
       - 'CHANGELOG.md'
       - 'package.json'
       - 'package-lock.json'
+  workflow_dispatch: 
 
 env:
   APP_BASE: meet-time
