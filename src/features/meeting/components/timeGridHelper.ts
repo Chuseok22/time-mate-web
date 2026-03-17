@@ -4,9 +4,12 @@ import { SelectedMap } from "@/features/meeting/components/TimeGridVote";
 export function getSelectedColor(count: number, maxCount: number): string {
   if (count === 0) return 'bg-gray-200 hover:bg-gray-300 text-gray-400 hover:text-gray-500';
 
-  if (count === maxCount) return 'bg-blue-700 hover:bg-blue-800 text-white';
-  if (count === maxCount - 1) return 'bg-blue-500 hover:bg-blue-600 text-neutral-100';
-  if (count === maxCount - 2) return 'bg-blue-300 hover:bg-blue-400 text-gray-600 hover:text-gray-700';
+  const ratio = count / maxCount;
+
+  if (ratio === 1)   return 'bg-blue-700 hover:bg-blue-800 text-white';
+  if (ratio > 0.75)  return 'bg-blue-500 hover:bg-blue-600 text-white';
+  if (ratio > 0.5)   return 'bg-blue-300 hover:bg-blue-400 text-gray-700 hover:text-gray-800';
+  if (ratio > 0.25)  return 'bg-blue-200 hover:bg-blue-300 text-gray-600 hover:text-gray-700';
   return 'bg-blue-100 hover:bg-blue-200 text-gray-400 hover:text-gray-500';
 }
 
